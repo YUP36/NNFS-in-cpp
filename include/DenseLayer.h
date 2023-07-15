@@ -1,24 +1,25 @@
 #ifndef DENSELAYER_H
 #define DENSELAYER_H
 
+#include <iostream>
 #include <Eigen/Dense>
-using Eigen::MatrixXd;
-using Eigen::RowVectorXd;
 
 class DenseLayer {
 
-    private:
-        MatrixXd weights;
-        RowVectorXd biases;
-        MatrixXd output;
-
     public:
         DenseLayer(int numInputs, int numNeurons);
+        friend std::ostream& operator<<(std::ostream& os, const DenseLayer& layer);
         void printLayer() const;
-        MatrixXd getWeights() const;
-        RowVectorXd getBiases() const;
-        void forward(MatrixXd inputs);
-        MatrixXd getOutput() const;
+        Eigen::MatrixXd getWeights() const;
+        Eigen::RowVectorXd getBiases() const;
+        void forward(Eigen::MatrixXd inputs);
+        Eigen::MatrixXd getOutput() const;
+        
+    private:
+        Eigen::MatrixXd weights;
+        Eigen::RowVectorXd biases;
+        Eigen::MatrixXd output;
+
 };
 
 #endif
