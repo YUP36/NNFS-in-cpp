@@ -9,6 +9,7 @@ class ActivationSoftmaxLossCategoricalCrossEntropy {
     
     public:
         ActivationSoftmaxLossCategoricalCrossEntropy();
+        Eigen::MatrixXd getDinputs();
         double forwardAndCalculate(Eigen::MatrixXd inputs, Eigen::VectorXi yTrue);
         void backward(Eigen::MatrixXd yPredicted, Eigen::VectorXi yTrue);
 

@@ -4,6 +4,7 @@
 #include "../include/ActivationReLu.h"
 #include "../include/ActivationSoftmax.h"
 #include "../include/LossCategoricalCrossEntropy.h"
+#include "../include/ActivationSoftmaxLossCategoricalCrossEntropy.h"
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -28,10 +29,18 @@ int main() {
     layer2.forward(activation1.getOutput());
     activation2.forward(layer2.getOutput());
 
-    // cout << activation2.getOutput() << endl;
+    loss.backward(activation2.getOutput(), dataset.getY());
+    activation2.backward(loss.getDinputs());
+
+    cout << activation2.getDinputs() << endl << endl << endl;
+    ActivationSoftmaxLossCategoricalCrossEntropy softmaxLoss = ActivationSoftmaxLossCategoricalCrossEntropy();
+    softmaxLoss.backward(activation2.getOutput(), dataset.getY());
+
+    cout << softmaxLoss.getDinputs() << endl;
+
 
     // cout << loss.forward(activation2.getOutput(), dataset.getY()) << endl;
-    // cout << loss.calculate(activation2.getOutput(), dataset.getY()) << endl;
+    // cout << endl << loss.calculate(activation2.getOutput(), dataset.getY()) << endl;
 
     // Eigen::MatrixXd softmaxOutputs = activation2.getOutput();
     // Eigen::VectorXd predictions = Eigen::VectorXd::Zero(softmaxOutputs.rows());

@@ -15,13 +15,15 @@ Eigen::MatrixXd ActivationSoftmax::getDinputs() const {
 
 void ActivationSoftmax::forward(MatrixXd inputs) {
     int numOutputs = inputs.cols();
-    int numSamples = inputs.rows();
     MatrixXd expInput = inputs.array().exp();
     MatrixXd sums = expInput.rowwise().sum();
     output = expInput.array() / sums.replicate(1, numOutputs).array();
 }
 
 void ActivationSoftmax::backward(MatrixXd dvalues) {
+    int numSamples = dvalues.rows();
+    int numOutputs = dvalues.cols();
+    
     dinputs = MatrixXd::Zero(numSamples, numOutputs);
     RowVectorXd sampleOutput = RowVectorXd::Zero(1, numOutputs);
     RowVectorXd sampleDvalue = RowVectorXd::Zero(1, numOutputs);

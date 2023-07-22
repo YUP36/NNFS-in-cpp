@@ -14,8 +14,6 @@ class ActivationSoftmax {
         void backward(Eigen::MatrixXd dvalues);
 
     private:
-        int numOutputs;
-        int numSamples;
         Eigen::MatrixXd output;
         Eigen::MatrixXd dinputs;
 
