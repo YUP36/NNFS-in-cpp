@@ -12,13 +12,18 @@ class DenseLayer {
         void printLayer() const;
         Eigen::MatrixXd getWeights() const;
         Eigen::RowVectorXd getBiases() const;
-        void forward(Eigen::MatrixXd inputs);
         Eigen::MatrixXd getOutput() const;
+        void forward(Eigen::MatrixXd inputs);
+        void backward(Eigen::MatrixXd dvalues);
         
     private:
+        Eigen::MatrixXd inputs;
+        Eigen::MatrixXd output;
         Eigen::MatrixXd weights;
         Eigen::RowVectorXd biases;
-        Eigen::MatrixXd output;
+        Eigen::MatrixXd dinputs;
+        Eigen::MatrixXd dweights;
+        Eigen::RowVectorXd dbiases;
 
 };
 

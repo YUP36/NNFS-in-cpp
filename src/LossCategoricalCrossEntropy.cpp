@@ -3,8 +3,13 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXi;
 using Eigen::VectorXd;
+using Eigen::placeholders::all;
 
 LossCategoricalCrossEntropy::LossCategoricalCrossEntropy() {}
+
+MatrixXd LossCategoricalCrossEntropy::getDinputs() const {
+    return dinputs;
+}
 
 VectorXd LossCategoricalCrossEntropy::forward(MatrixXd yPredicted, VectorXi yTrue) {
     int numSamples = yTrue.rows();
@@ -19,3 +24,9 @@ VectorXd LossCategoricalCrossEntropy::forward(MatrixXd yPredicted, VectorXi yTru
     return output;
 }
 
+void LossCategoricalCrossEntropy::backward(MatrixXd yPredictions, VectorXi yTrue) {
+    int numLabels = yPredictions.cols();
+    MatrixXd identity = MatrixXd::Identity(numLabels, numLabels);
+    MatrixXd oneHotYTrue = identity(all, yTrue);
+    dinputs = -1 * (oneHotYTrue.array() / yPredictions.array());
+}

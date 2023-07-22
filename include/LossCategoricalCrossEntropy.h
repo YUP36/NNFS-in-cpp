@@ -9,7 +9,12 @@ class LossCategoricalCrossEntropy : public Loss {
 
     public:
         LossCategoricalCrossEntropy();
-        Eigen::VectorXd forward(Eigen::MatrixXd, Eigen::VectorXi) override;
+        Eigen::MatrixXd getDinputs() const;
+        Eigen::VectorXd forward(Eigen::MatrixXd yPredicted, Eigen::VectorXi yTrue) override;
+        void backward(Eigen::MatrixXd yPredicted, Eigen::VectorXi yTrue);
+
+    private:
+        Eigen::MatrixXd dinputs;
 };
 
 #endif

@@ -21,11 +21,17 @@ MatrixXd DenseLayer::getWeights() const {
 RowVectorXd DenseLayer::getBiases() const {
     return biases;
 }
-
-void DenseLayer::forward(MatrixXd inputs) {
-    output = (inputs * weights).rowwise() + biases;
-}
-
 MatrixXd DenseLayer::getOutput() const {
     return output;
+}
+
+void DenseLayer::forward(MatrixXd inputs) {
+    this->inputs = inputs;
+    output = (this->inputs * weights).rowwise() + biases;
+}
+
+void DenseLayer::backward(MatrixXd dvalues) {
+    dweights = inputs.transpose() * dvalues; // y don't we noramlize for sample size????
+    dbiases = dvalues.rowwise().sum();
+    dinputs = dvalues * weights.transpose();
 }
