@@ -19,7 +19,7 @@ double ActivationSoftmaxLossCategoricalCrossEntropy::forwardAndCalculate(MatrixX
 }
 
 void ActivationSoftmaxLossCategoricalCrossEntropy::backward(MatrixXd yPredicted, VectorXi yTrue) {
-    int numSamples = yPredicted.cols();
+    int numSamples = yPredicted.rows();
     dinputs = yPredicted;
     for(int row = 0; row < numSamples; row++) {
         dinputs(row, yTrue(row, 0)) -= 1;

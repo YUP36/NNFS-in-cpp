@@ -12,9 +12,10 @@ class ActivationSoftmax {
         Eigen::MatrixXd getDinputs() const;
         void forward(Eigen::MatrixXd inputs);
         void backward(Eigen::MatrixXd dvalues);
+        
+        Eigen::MatrixXd output;
 
     private:
-        Eigen::MatrixXd output;
         Eigen::MatrixXd dinputs;
 
 };

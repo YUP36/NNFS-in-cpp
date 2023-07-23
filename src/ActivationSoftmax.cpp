@@ -28,7 +28,6 @@ void ActivationSoftmax::backward(MatrixXd dvalues) {
     RowVectorXd sampleOutput = RowVectorXd::Zero(1, numOutputs);
     RowVectorXd sampleDvalue = RowVectorXd::Zero(1, numOutputs);
     MatrixXd outputDiag = MatrixXd::Zero(numOutputs, numOutputs);
-
     for(int row = 0; row < numSamples; row++) {
         sampleOutput = output.row(row);
         sampleDvalue = dvalues.row(row);
