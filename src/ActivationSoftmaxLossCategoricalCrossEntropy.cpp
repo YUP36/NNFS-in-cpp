@@ -7,23 +7,28 @@ using Eigen::VectorXi;
 ActivationSoftmaxLossCategoricalCrossEntropy::ActivationSoftmaxLossCategoricalCrossEntropy() {
     activation = ActivationSoftmax();
     loss = LossCategoricalCrossEntropy();
+
+    dinputs = nullptr;
 }
 
-MatrixXd ActivationSoftmaxLossCategoricalCrossEntropy::getDinputs() {
-    return dinputs;
-}
-
-double ActivationSoftmaxLossCategoricalCrossEntropy::forwardAndCalculate(MatrixXd inputs, VectorXi yTrue) {
+double ActivationSoftmaxLossCategoricalCrossEntropy::forwardAndCalculate(MatrixXd* inputs, VectorXi* yTrue) {
     activation.forward(inputs);
     return loss.calculate(activation.getOutput(), yTrue);
 }
 
-void ActivationSoftmaxLossCategoricalCrossEntropy::backward(MatrixXd yPredicted, VectorXi yTrue) {
-    int numSamples = yPredicted.rows();
+MatrixXd* ActivationSoftmaxLossCategoricalCrossEntropy::getOutput() const {
+    return activation.getOutput();
+}
+
+void ActivationSoftmaxLossCategoricalCrossEntropy::backward(MatrixXd* yPredicted, VectorXi* yTrue) {
+    int numSamples = yPredicted->rows();
     dinputs = yPredicted;
     for(int row = 0; row < numSamples; row++) {
-        dinputs(row, yTrue(row, 0)) -= 1;
+        (*dinputs)(row, (*yTrue)(row, 0)) -= 1;
     }
-    dinputs /= numSamples;
-    
+    *dinputs /= numSamples;
+}
+
+MatrixXd* ActivationSoftmaxLossCategoricalCrossEntropy::getDinputs() const {
+    return dinputs;
 }

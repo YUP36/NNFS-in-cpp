@@ -9,14 +9,15 @@ class ActivationReLu {
 
     public:
         ActivationReLu();
-        Eigen::MatrixXd getOutput() const;
-        void forward(Eigen::MatrixXd input);
-        void backward(Eigen::MatrixXd dvalues);
+        Eigen::MatrixXd* getOutput() const;
+        void forward(Eigen::MatrixXd* input);
+        void backward(Eigen::MatrixXd* dvalues);
+        Eigen::MatrixXd* getDinputs() const;
 
     private:
-        Eigen::MatrixXd inputs;
-        Eigen::MatrixXd output;
-        Eigen::MatrixXd dinputs;
+        Eigen::MatrixXd* input;
+        Eigen::MatrixXd* output;
+        Eigen::MatrixXd* dinputs;
 
 };
 

@@ -96,6 +96,7 @@
         "openglsupport": "cpp",
         "specialfunctions": "cpp",
         "splines": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "*.expression": "cpp"
     }
 }

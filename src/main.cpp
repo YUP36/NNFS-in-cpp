@@ -5,73 +5,98 @@
 #include "../include/ActivationSoftmax.h"
 #include "../include/LossCategoricalCrossEntropy.h"
 #include "../include/ActivationSoftmaxLossCategoricalCrossEntropy.h"
+#include "../include/OptimizerSGD.h"
+
+// #include <omp.h>
+//  /opt/homebrew/opt/libomp/include -L/opt/homebrew/opt/libomp/lib
+#include "/opt/homebrew/opt/libomp/include/omp.h"
+
+//   export LDFLAGS="-L/opt/homebrew/opt/libomp/lib"
+//   export CPPFLAGS="-I/opt/homebrew/opt/libomp/include"
 
 using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::VectorXi;
-
 using namespace std::chrono;
+
+
 // auto start = high_resolution_clock::now();
-// loss.backward(softmax_outputs, class_targets);
+
 // auto stop = high_resolution_clock::now();
 // auto duration = duration_cast<microseconds>(stop - start);
 // std::cout << duration.count() << std::endl;
 
 int main() {
+    omp_set_num_threads(4);
+    // Eigen::setNbThreads(2);
+    cout << Eigen::nbThreads() << endl;
+
     Spiral dataset(100, 3);
-    DenseLayer layer1(2, 3);
+    MatrixXd X = dataset.getX();
+    VectorXi Y = dataset.getY();
+
+    DenseLayer layer1(2, 64);
     ActivationReLu activation1 = ActivationReLu();
-    DenseLayer layer2(3, 3);
-    ActivationSoftmax activation2 = ActivationSoftmax();
-    LossCategoricalCrossEntropy loss = LossCategoricalCrossEntropy();
-    ActivationSoftmaxLossCategoricalCrossEntropy softmaxLoss = ActivationSoftmaxLossCategoricalCrossEntropy();
+    DenseLayer layer2(64, 3);
+    // ActivationSoftmax activation2 = ActivationSoftmax();
+    // LossCategoricalCrossEntropy CCE = LossCategoricalCrossEntropy();
+    ActivationSoftmaxLossCategoricalCrossEntropy activationLoss = ActivationSoftmaxLossCategoricalCrossEntropy();
+    OptimizerSGD optimizer = OptimizerSGD();
 
-    // MatrixXd softmax_outputs(3,3);
-    // softmax_outputs << 0.7, 0.1, 0.2,
-    //                 0.1, 0.5, 0.4,
-    //                 0.02, 0.9, 0.08;
-    // VectorXi class_targets(3);
-    // class_targets << 0, 1, 1;
+    double loss;
+    MatrixXd softmaxOutputs;
+    VectorXd predictions;
+    int matchCount;
+    Eigen::Index maxRow;
+    for(int epoch = 0; epoch < 10001; epoch++){
 
-    // loss.backward(softmax_outputs, class_targets);
-    // activation2.output = softmax_outputs;
-    // activation2.backward(loss.getDinputs());
-    // cout << activation2.getDinputs() << endl;
+        auto start = high_resolution_clock::now();
+        // forward pass: 1792
+        layer1.forward(&X);
+        activation1.forward(layer1.getOutput());
+        layer2.forward(activation1.getOutput());
+        // activation2.forward(layer2.getOutput());
+        // loss = CCE.calculate(layer2.getOutput(), &Y);
+        loss = activationLoss.forwardAndCalculate(layer2.getOutput(), &Y);
 
-    // softmaxLoss.backward(softmax_outputs, class_targets);
-    // cout << softmaxLoss.getDinputs() << endl;
+        // accuracy calulation: 72
+        softmaxOutputs = *(activationLoss.getOutput());
+        predictions = Eigen::VectorXd::Zero(softmaxOutputs.rows());
+        for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
+            softmaxOutputs.row(rowIndex).maxCoeff(&maxRow);
+            predictions(rowIndex) = maxRow;
+        }
 
+        matchCount = 0;
+        for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
+            if(predictions(rowIndex) == Y(rowIndex)) {
+                matchCount++;
+            }
+        }
 
-    layer1.forward(dataset.getX());
-    activation1.forward(layer1.getOutput());
-    layer2.forward(activation1.getOutput());
-    activation2.forward(layer2.getOutput());
+        // // backward pass: ~2700
+        // CCE.backward(activation2.getOutput(), &Y);
+        // activation2.backward(CCE.getDinputs());
+        activationLoss.backward(activationLoss.getOutput(), &Y);
+        layer2.backward(activationLoss.getDinputs());
+        activation1.backward(layer2.getDinputs());
+        layer1.backward(activation1.getDinputs());
 
-    loss.backward(activation2.getOutput(), dataset.getY());
-    activation2.backward(loss.getDinputs());
+        // parameter update: 14
+        optimizer.updateParameters(&layer1);
+        optimizer.updateParameters(&layer2);
 
-    softmaxLoss.backward(activation2.getOutput(), dataset.getY());
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(stop - start);
 
-    // cout << loss.forward(activation2.getOutput(), dataset.getY()) << endl;
-    // cout << endl << loss.calculate(activation2.getOutput(), dataset.getY()) << endl;
-
-    // Eigen::MatrixXd softmaxOutputs = activation2.getOutput();
-    // Eigen::VectorXd predictions = Eigen::VectorXd::Zero(softmaxOutputs.rows());
-    // Eigen::Index maxRow;
-    // for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
-    //     softmaxOutputs.row(rowIndex).maxCoeff(&maxRow);
-    //     predictions(rowIndex) = maxRow;
-    // }
-
-    // int matchCount = 0;
-    // for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
-    //     if(predictions(rowIndex) == dataset.getY()(rowIndex)) {
-    //         matchCount++;
-    //     }
-    // }
-
-    // cout << (double) matchCount / dataset.getY().rows() << endl;
+        if((epoch % 100) == 0) {
+            cout << "Epoch: " << epoch << "\t";
+            cout << "Loss: " << loss << "\t";
+            cout << "Accuracy: " << (double) matchCount / Y.rows() << endl;
+            std::cout << duration.count() << std::endl;
+        }
+    }
 
     return 0;
 }

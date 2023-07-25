@@ -1,12 +1,23 @@
 #include "../include/DenseLayer.h"
 
 using namespace std;
+// using namespace std::chrono;
 using Eigen::MatrixXd;
 using Eigen::RowVectorXd;
 
-DenseLayer::DenseLayer(int numInputs, int numNeurons) {
-    weights = MatrixXd::Random(numInputs, numNeurons);
-    biases = RowVectorXd::Zero(numNeurons);
+DenseLayer::DenseLayer(int numInputs, int numNeurons){
+    input = nullptr;
+    output = nullptr;
+
+    weights = new MatrixXd(numInputs, numNeurons);
+    *weights = MatrixXd::Random(numInputs, numNeurons);
+
+    biases = new RowVectorXd(1, numNeurons);
+    *biases = RowVectorXd::Zero(1, numNeurons);
+
+    dinputs = nullptr;
+    dweights = nullptr;
+    dbiases = nullptr;
 }
 
 ostream& operator<<(ostream& os, const DenseLayer& layer) {
@@ -14,24 +25,55 @@ ostream& operator<<(ostream& os, const DenseLayer& layer) {
     return os;
 }
 
-MatrixXd DenseLayer::getWeights() const {
+MatrixXd* DenseLayer::getWeights() const {
     return weights;
 }
 
-RowVectorXd DenseLayer::getBiases() const {
+void DenseLayer::setWeights(MatrixXd newWeights) {
+    *weights = newWeights;
+}
+
+RowVectorXd* DenseLayer::getBiases() const {
     return biases;
 }
-MatrixXd DenseLayer::getOutput() const {
+
+void DenseLayer::setBiases(RowVectorXd newBiases) {
+    *biases = newBiases;
+}
+
+void DenseLayer::forward(MatrixXd* in) {
+    input = in;
+    output = new MatrixXd(input->rows(), weights->cols());
+    // auto start = high_resolution_clock::now();
+    *output = ((*input) * (*weights)).rowwise() + (*biases);
+    // auto stop = high_resolution_clock::now();
+    // auto duration = duration_cast<microseconds>(stop - start);
+    // std::cout << duration.count() << std::endl;
+}
+
+MatrixXd* DenseLayer::getOutput() const {
     return output;
 }
 
-void DenseLayer::forward(MatrixXd inputs) {
-    this->inputs = inputs;
-    output = (this->inputs * weights).rowwise() + biases;
+void DenseLayer::backward(MatrixXd* dvalues) {
+    dweights = new MatrixXd(input->rows(), dvalues->cols());
+    *dweights = input->transpose() * (*dvalues); // y don't we noramlize for sample size????
+
+    dbiases = new RowVectorXd(1, dvalues->cols());
+    *dbiases = dvalues->colwise().sum();
+
+    dinputs = new MatrixXd(dvalues->rows(), weights->rows());
+    *dinputs = (*dvalues) * weights->transpose();
 }
 
-void DenseLayer::backward(MatrixXd dvalues) {
-    dweights = inputs.transpose() * dvalues; // y don't we noramlize for sample size????
-    dbiases = dvalues.rowwise().sum();
-    dinputs = dvalues * weights.transpose();
+MatrixXd* DenseLayer::getDinputs() const {
+    return dinputs;
+}
+
+MatrixXd* DenseLayer::getDweights() const {
+    return dweights;
+}
+
+RowVectorXd* DenseLayer::getDbiases() const {
+    return dbiases;
 }

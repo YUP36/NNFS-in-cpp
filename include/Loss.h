@@ -7,8 +7,8 @@ class Loss {
 
     public:
         Loss();
-        double calculate(Eigen::MatrixXd yPredicted, Eigen::VectorXi yTrue);
-        virtual Eigen::VectorXd forward(Eigen::MatrixXd yPredicted, Eigen::VectorXi yTrue);
+        double calculate(Eigen::MatrixXd* yPredicted, Eigen::VectorXi* yTrue);
+        virtual Eigen::VectorXd forward(Eigen::MatrixXd* yPredicted, Eigen::VectorXi* yTrue);
 
 };
 

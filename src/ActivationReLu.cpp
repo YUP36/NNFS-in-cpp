@@ -1,24 +1,35 @@
 #include "../include/ActivationReLu.h"
 
-ActivationReLu::ActivationReLu() {}
+using Eigen::MatrixXd;
 
-Eigen::MatrixXd ActivationReLu::getOutput() const {
+ActivationReLu::ActivationReLu() {
+    input = nullptr;
+    output = nullptr;
+    dinputs = nullptr;
+}
+
+MatrixXd* ActivationReLu::getOutput() const {
     return output;
 }
 
-void ActivationReLu::forward(Eigen::MatrixXd inputs) {
-    this->inputs = inputs;
-    output = this->inputs.unaryExpr([](double x){return std::max(0.0, x);});
+void ActivationReLu::forward(MatrixXd* in) {
+    input = in;
+    output = new MatrixXd(input->rows(), input->cols());
+    *output = input->unaryExpr([](double x){return std::max(0.0, x);});
 }
 
-void ActivationReLu::backward(Eigen::MatrixXd dvalues) {
+void ActivationReLu::backward(MatrixXd* dvalues) {
     dinputs = dvalues;
-    for(int i = 0; i < inputs.rows(); i++) {
-        for(int j = 0; j < inputs.cols(); j++) {
-            if(inputs(i, j) < 0) {
-                dinputs(i, j) = 0;
+    for(int i = 0; i < input->rows(); i++) {
+        for(int j = 0; j < input->cols(); j++) {
+            if((*input)(i, j) < 0) {
+                (*dinputs)(i, j) = 0;
             }
         }
     }
     // dinputs = dvalues.cwiseProduct(inputs.unaryExpr([](double x){return (x > 0) ? 1 : 0;}));
+}
+
+MatrixXd* ActivationReLu::getDinputs() const {
+    return dinputs;
 }

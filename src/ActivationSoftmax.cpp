@@ -3,36 +3,41 @@
 using Eigen::MatrixXd;
 using Eigen::RowVectorXd;
 
-ActivationSoftmax::ActivationSoftmax() {}
+ActivationSoftmax::ActivationSoftmax() {
+    dinputs = nullptr;
+}
 
-Eigen::MatrixXd ActivationSoftmax::getOutput() const {
+void ActivationSoftmax::forward(MatrixXd* input) {
+    int numOutputs = input->cols();
+    MatrixXd expInput = input->array().exp();
+    MatrixXd sums = expInput.rowwise().sum();
+
+    output = new MatrixXd(input->rows(), input->cols());
+    *output = expInput.array() / sums.replicate(1, numOutputs).array();
+}
+
+Eigen::MatrixXd* ActivationSoftmax::getOutput() const {
     return output;
 }
 
-Eigen::MatrixXd ActivationSoftmax::getDinputs() const {
-    return dinputs;
-}
-
-void ActivationSoftmax::forward(MatrixXd inputs) {
-    int numOutputs = inputs.cols();
-    MatrixXd expInput = inputs.array().exp();
-    MatrixXd sums = expInput.rowwise().sum();
-    output = expInput.array() / sums.replicate(1, numOutputs).array();
-}
-
-void ActivationSoftmax::backward(MatrixXd dvalues) {
-    int numSamples = dvalues.rows();
-    int numOutputs = dvalues.cols();
+void ActivationSoftmax::backward(MatrixXd* dvalues) {
+    int numSamples = dvalues->rows();
+    int numOutputs = dvalues->cols();
     
-    dinputs = MatrixXd::Zero(numSamples, numOutputs);
+    dinputs = new MatrixXd(numSamples, numOutputs);
     RowVectorXd sampleOutput = RowVectorXd::Zero(1, numOutputs);
     RowVectorXd sampleDvalue = RowVectorXd::Zero(1, numOutputs);
     MatrixXd outputDiag = MatrixXd::Zero(numOutputs, numOutputs);
+
     for(int row = 0; row < numSamples; row++) {
-        sampleOutput = output.row(row);
-        sampleDvalue = dvalues.row(row);
+        sampleOutput = output->row(row);
+        sampleDvalue = dvalues->row(row);
         outputDiag = sampleOutput.asDiagonal();
 
-        dinputs.row(row) = (outputDiag - (sampleOutput.transpose() * sampleOutput)) * sampleDvalue.transpose();
+        dinputs->row(row) = (outputDiag - (sampleOutput.transpose() * sampleOutput)) * sampleDvalue.transpose();
     }
+}
+
+Eigen::MatrixXd* ActivationSoftmax::getDinputs() const {
+    return dinputs;
 }

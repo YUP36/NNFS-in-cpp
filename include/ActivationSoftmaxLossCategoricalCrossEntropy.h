@@ -9,14 +9,15 @@ class ActivationSoftmaxLossCategoricalCrossEntropy {
     
     public:
         ActivationSoftmaxLossCategoricalCrossEntropy();
-        Eigen::MatrixXd getDinputs();
-        double forwardAndCalculate(Eigen::MatrixXd inputs, Eigen::VectorXi yTrue);
-        void backward(Eigen::MatrixXd yPredicted, Eigen::VectorXi yTrue);
+        double forwardAndCalculate(Eigen::MatrixXd* inputs, Eigen::VectorXi* yTrue);
+        Eigen::MatrixXd* getOutput() const;
+        Eigen::MatrixXd* getDinputs() const;
+        void backward(Eigen::MatrixXd* yPredicted, Eigen::VectorXi* yTrue);
 
     private:
         ActivationSoftmax activation;
         LossCategoricalCrossEntropy loss;
-        Eigen::MatrixXd dinputs;
+        Eigen::MatrixXd* dinputs;
 
 };
 
