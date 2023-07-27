@@ -8,7 +8,7 @@ OBJ := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
 
 CXX := g++
 CXXVERSION := -std=c++17
-CXXFLAGS := -Wall
+CXXFLAGS := -Wall -Ofast -march=native
 INCLUDES := -I /usr/local/include/*
 
 .PHONY: all clean
@@ -19,7 +19,7 @@ all: $(EXE)
 # $(info $$OBJ is [${OBJ}])
 
 $(EXE): $(OBJ)
-	$(CXX) $(CXXVERSION) $(INCLUDES) $(CXXFLAGS) $^ -openmp -o $@
+	$(CXX) $(CXXVERSION) $(INCLUDES) $(CXXFLAGS) $^ -o $@
 
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp | $(OBJ_DIR)
 	$(CXX) $(CXXVERSION) $(INCLUDES) $(CXXFLAGS) -c $(SRC_DIR)/main.cpp -o $(OBJ_DIR)/main.o

@@ -2,8 +2,8 @@
 #define LOSSCATEGORICALCROSSENTROPY_H
 
 #include <iostream>
-#include "../include/Loss.h"
 #include <Eigen/Dense>
+#include "../include/Loss.h"
 
 class LossCategoricalCrossEntropy : public Loss {
 

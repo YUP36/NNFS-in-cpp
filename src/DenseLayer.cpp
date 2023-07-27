@@ -1,7 +1,6 @@
 #include "../include/DenseLayer.h"
 
 using namespace std;
-// using namespace std::chrono;
 using Eigen::MatrixXd;
 using Eigen::RowVectorXd;
 
@@ -33,6 +32,10 @@ void DenseLayer::setWeights(MatrixXd newWeights) {
     *weights = newWeights;
 }
 
+void DenseLayer::updateWeights(MatrixXd weightsUpdate) {
+    *weights += weightsUpdate;
+}
+
 RowVectorXd* DenseLayer::getBiases() const {
     return biases;
 }
@@ -41,14 +44,15 @@ void DenseLayer::setBiases(RowVectorXd newBiases) {
     *biases = newBiases;
 }
 
+void DenseLayer::updateBiases(RowVectorXd biasesUpdate) {
+    *biases += biasesUpdate;
+}
+
+
 void DenseLayer::forward(MatrixXd* in) {
     input = in;
-    output = new MatrixXd(input->rows(), weights->cols());
-    // auto start = high_resolution_clock::now();
+    if(!output) output = new MatrixXd(input->rows(), weights->cols());
     *output = ((*input) * (*weights)).rowwise() + (*biases);
-    // auto stop = high_resolution_clock::now();
-    // auto duration = duration_cast<microseconds>(stop - start);
-    // std::cout << duration.count() << std::endl;
 }
 
 MatrixXd* DenseLayer::getOutput() const {
@@ -56,13 +60,13 @@ MatrixXd* DenseLayer::getOutput() const {
 }
 
 void DenseLayer::backward(MatrixXd* dvalues) {
-    dweights = new MatrixXd(input->rows(), dvalues->cols());
+    if(!dweights) dweights = new MatrixXd(input->rows(), dvalues->cols());
     *dweights = input->transpose() * (*dvalues); // y don't we noramlize for sample size????
 
-    dbiases = new RowVectorXd(1, dvalues->cols());
+    if(!dbiases) dbiases = new RowVectorXd(1, dvalues->cols());
     *dbiases = dvalues->colwise().sum();
 
-    dinputs = new MatrixXd(dvalues->rows(), weights->rows());
+    if(!dinputs) dinputs = new MatrixXd(dvalues->rows(), weights->rows());
     *dinputs = (*dvalues) * weights->transpose();
 }
 

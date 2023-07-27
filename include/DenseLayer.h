@@ -13,9 +13,10 @@ class DenseLayer {
         
         Eigen::MatrixXd* getWeights() const;
         void setWeights(Eigen::MatrixXd newWeights);
+        void updateWeights(Eigen::MatrixXd weightsUpdate);
         Eigen::RowVectorXd* getBiases() const;
         void setBiases(Eigen::RowVectorXd newBiases);
-
+        void updateBiases(Eigen::RowVectorXd biasesUpdate);
         void forward(Eigen::MatrixXd* in);
         Eigen::MatrixXd* getOutput() const;
 

@@ -7,8 +7,7 @@ using Eigen::VectorXd;
 Loss::Loss() {}
 
 double Loss::calculate(MatrixXd* yPredicted, VectorXi* yTrue) {
-    VectorXd losses = forward(yPredicted, yTrue);
-    return losses.mean();
+    return forward(yPredicted, yTrue).mean();
 }
 
 VectorXd Loss::forward(MatrixXd* yPredicted, VectorXi* yTrue) {

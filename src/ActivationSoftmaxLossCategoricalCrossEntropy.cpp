@@ -11,13 +11,16 @@ ActivationSoftmaxLossCategoricalCrossEntropy::ActivationSoftmaxLossCategoricalCr
     dinputs = nullptr;
 }
 
-double ActivationSoftmaxLossCategoricalCrossEntropy::forwardAndCalculate(MatrixXd* inputs, VectorXi* yTrue) {
+void ActivationSoftmaxLossCategoricalCrossEntropy::forward(MatrixXd* inputs) {
     activation.forward(inputs);
-    return loss.calculate(activation.getOutput(), yTrue);
 }
 
 MatrixXd* ActivationSoftmaxLossCategoricalCrossEntropy::getOutput() const {
     return activation.getOutput();
+}
+
+double ActivationSoftmaxLossCategoricalCrossEntropy::calculate(VectorXi* yTrue) {
+    return loss.calculate(activation.getOutput(), yTrue);
 }
 
 void ActivationSoftmaxLossCategoricalCrossEntropy::backward(MatrixXd* yPredicted, VectorXi* yTrue) {

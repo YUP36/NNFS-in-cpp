@@ -27,7 +27,7 @@ void LossCategoricalCrossEntropy::backward(MatrixXd* yPredictions, VectorXi* yTr
     MatrixXd identity = MatrixXd::Identity(numLabels, numLabels);
     MatrixXd oneHotYTrue = identity(*yTrue, all);
     
-    dinputs = new MatrixXd(numSamples, numLabels);
+    if(!dinputs) dinputs = new MatrixXd(numSamples, numLabels);
     *dinputs = (oneHotYTrue.array() / yPredictions->array()) / (-numSamples);
 }
 

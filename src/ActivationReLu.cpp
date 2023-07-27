@@ -14,7 +14,7 @@ MatrixXd* ActivationReLu::getOutput() const {
 
 void ActivationReLu::forward(MatrixXd* in) {
     input = in;
-    output = new MatrixXd(input->rows(), input->cols());
+    if(!output) output = new MatrixXd(input->rows(), input->cols());
     *output = input->unaryExpr([](double x){return std::max(0.0, x);});
 }
 

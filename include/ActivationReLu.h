@@ -1,8 +1,6 @@
 #ifndef ACTIVATIONRELU_H
 #define ACTIVATIONRELU_H
 
-#include <iostream>
-#include <cmath>
 #include <Eigen/Dense>
 
 class ActivationReLu {

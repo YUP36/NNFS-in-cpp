@@ -1,7 +1,6 @@
 #ifndef ACTIVATIONSOFTMAX_H
 #define ACTIVATIONSOFTMAX_H
 
-#include <iostream>
 #include <Eigen/Dense>
 
 class ActivationSoftmax {
