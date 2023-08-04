@@ -14,6 +14,9 @@
 #include "../include/ActivationSoftmaxLossCategoricalCrossEntropy.h"
 
 #include "../include/OptimizerSGD.h"
+#include "../include/OptimizerAdagrad.h"
+#include "../include/OptimizerRMSProp.h"
+#include "../include/OptimizerAdam.h"
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -41,7 +44,8 @@ int main() {
     // ActivationSoftmax activation2 = ActivationSoftmax();
     // LossCategoricalCrossEntropy CCE = LossCategoricalCrossEntropy();
     ActivationSoftmaxLossCategoricalCrossEntropy activationLoss = ActivationSoftmaxLossCategoricalCrossEntropy();
-    OptimizerSGD optimizer = OptimizerSGD();
+    // OptimizerSGD optimizer = OptimizerSGD(1.0);
+    OptimizerAdam optimizer = OptimizerAdam(0.02, 1e-5);
 
     double loss;
     MatrixXd softmaxOutputs;
@@ -100,7 +104,6 @@ int main() {
         }
     }
 
-
     // VISUALIZATION
     const int WIDTH = 1000;
     const int HEIGHT = 1000;
@@ -123,18 +126,18 @@ int main() {
         for (int x = 0; x < WIDTH; ++x) {
             int index = 4 * (y * WIDTH + x);
             pix = activationLoss.getOutput()->row(y * HEIGHT + x);
-            // blue: 72, 133, 232
-            // red: 255, 130, 130
             // green: 109, 209, 129
-            pixels[index + 0] = sqrt(72 * 72 * pix(0) + 255 * 255 * pix(1) + 109 * 109 * pix(2));
-            pixels[index + 1] = sqrt(133 * 133 * pix(0) + 130 * 130 * pix(1) + 209 * 209 * pix(2));
-            pixels[index + 2] = sqrt(232 * 232 * pix(0) + 130 * 130 * pix(1) + 129 * 129 * pix(2));
+            // red: 255, 130, 130
+            // blue: 72, 133, 232
+            pixels[index + 0] = sqrt(109 * 109 * pix(0) + 255 * 255 * pix(1) + 72 * 72 * pix(2));
+            pixels[index + 1] = sqrt(209 * 209 * pix(0) + 130 * 130 * pix(1) + 133 * 133 * pix(2));
+            pixels[index + 2] = sqrt(129 * 129 * pix(0) + 130 * 130 * pix(1) + 232 * 232 * pix(2));
             pixels[index + 3] = 255; // Alpha channel (opacity: 255 = fully opaque)
             // pixels[4 * (y * WIDTH + x) + gridPredictions(HEIGHT * y + x, 0)] = 255;
         }
     }
     ImageGenerator gen = ImageGenerator();
-    gen.createImage(pixels, "visualizations/lr1dr0m0.png", WIDTH, HEIGHT);
+    gen.createImage(pixels, "visualizations/adam/lr0.02dr1e-5.png", WIDTH, HEIGHT);
 
     return 0;
 }

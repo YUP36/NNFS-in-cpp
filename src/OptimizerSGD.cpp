@@ -20,8 +20,14 @@ void OptimizerSGD::decay() {
 }
 
 void OptimizerSGD::updateParameters(DenseLayer* layer) {
-    layer->updateWeights(-currentLearningRate * (*layer->getDweights()));
-    layer->updateBiases(-currentLearningRate * (*layer->getDbiases()));
+    MatrixXd weightUpdate = (momentum * *layer->getWeightMomentum()) - (currentLearningRate * *layer->getDweights());
+    RowVectorXd biasUpdate = (momentum * *layer->getBiasMomentum()) - (currentLearningRate * *layer->getDbiases());
+
+    layer->setWeightMomentum(&weightUpdate);
+    layer->setBiasMomentum(&biasUpdate);
+
+    layer->updateWeights(&weightUpdate);
+    layer->updateBiases(&biasUpdate);
 }
 
 void OptimizerSGD::incrementIteration() {

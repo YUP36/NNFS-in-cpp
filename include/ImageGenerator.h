@@ -1,6 +1,8 @@
 #ifndef IMAGEGENERATOR_H
 #define IMAGEGENERATOR_H
 
+#include <vector>
+
 class ImageGenerator {
 
     public:

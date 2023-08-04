@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
 #include "../include/lodepng.h"
-
 #include "../include/ImageGenerator.h"
+
 ImageGenerator::ImageGenerator() {}
 
 void ImageGenerator::createImage(const std::vector<unsigned char>& pixels, const std::string& filename, const int WIDTH, const int HEIGHT) {
