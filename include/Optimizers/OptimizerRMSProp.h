@@ -2,7 +2,7 @@
 #define OPTIMIZERRMSPROP_H
 
 #include <Eigen/Dense>
-#include "DenseLayer.h"
+#include "../DenseLayer.h"
 
 class OptimizerRMSProp {
 

@@ -1,4 +1,4 @@
-#include "../include/Spiral.h"
+#include "../../include/DataGeneration/Spiral.h"
 
 using Eigen::MatrixX2d;
 using Eigen::VectorXi;

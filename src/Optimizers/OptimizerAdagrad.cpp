@@ -1,4 +1,4 @@
-#include "../include/OptimizerAdagrad.h"
+#include "../../include/Optimizers/OptimizerAdagrad.h"
 
 using Eigen::MatrixXd;
 using Eigen::RowVectorXd;

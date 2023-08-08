@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <Eigen/Dense>
-#include "../include/Loss.h"
+#include "Loss.h"
 
 class LossCategoricalCrossEntropy : public Loss {
 

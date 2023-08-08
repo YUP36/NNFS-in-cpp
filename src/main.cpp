@@ -1,22 +1,22 @@
 #include <iostream>
 #include <vector>
 
-#include "../include/lodepng.h"
-#include "../include/ImageGenerator.h"
-#include "../include/Spiral.h"
+#include "../include/DataGeneration/lodepng.h"
+#include "../include/DataGeneration/ImageGenerator.h"
+#include "../include/DataGeneration/Spiral.h"
 
 #include "../include/DenseLayer.h"
 
-#include "../include/ActivationReLu.h"
-#include "../include/ActivationSoftmax.h"
+#include "../include/ActivationFunctions/ActivationReLu.h"
+#include "../include/ActivationFunctions/ActivationSoftmax.h"
 
-#include "../include/LossCategoricalCrossEntropy.h"
-#include "../include/ActivationSoftmaxLossCategoricalCrossEntropy.h"
+#include "../include/LossFunctions/LossCategoricalCrossEntropy.h"
+#include "../include/LossFunctions/ActivationSoftmaxLossCategoricalCrossEntropy.h"
 
-#include "../include/OptimizerSGD.h"
-#include "../include/OptimizerAdagrad.h"
-#include "../include/OptimizerRMSProp.h"
-#include "../include/OptimizerAdam.h"
+#include "../include/Optimizers/OptimizerSGD.h"
+#include "../include/Optimizers/OptimizerAdagrad.h"
+#include "../include/Optimizers/OptimizerRMSProp.h"
+#include "../include/Optimizers/OptimizerAdam.h"
 
 using namespace std;
 using Eigen::MatrixXd;

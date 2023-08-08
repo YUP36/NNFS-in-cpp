@@ -1,13 +1,13 @@
-#ifndef OPTIMIZERADAGRAD_H
-#define OPTIMIZERADAGRAD_H
+#ifndef OPTIMIZERADAM_H
+#define OPTIMIZERADAM_H
 
 #include <Eigen/Dense>
-#include "DenseLayer.h"
+#include "../DenseLayer.h"
 
-class OptimizerAdagrad {
+class OptimizerAdam {
 
     public:
-        OptimizerAdagrad(double lr = 1.0, double dr = 0.0, double e = 1e-7);
+        OptimizerAdam(double lr = 1.0, double dr = 0.0, double e = 1e-7, double b1 = 0.9, double b2 = 0.999);
         double getLearningRate();
         void decay();
         void updateParameters(DenseLayer* layer);
@@ -19,6 +19,8 @@ class OptimizerAdagrad {
         double decayRate;
         double iteration;
         double epsilon;
+        double beta1;
+        double beta2;
 
 };
 

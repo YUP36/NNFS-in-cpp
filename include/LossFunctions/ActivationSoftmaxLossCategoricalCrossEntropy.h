@@ -2,8 +2,8 @@
 #define ACTIVATIONSOFTMAXLOSSCATEGORICALCROSSENTROPY_H
 
 #include <Eigen/Dense>
-#include "../include/ActivationSoftmax.h"
-#include "../include/LossCategoricalCrossEntropy.h"
+#include "../ActivationFunctions/ActivationSoftmax.h"
+#include "LossCategoricalCrossEntropy.h"
 
 class ActivationSoftmaxLossCategoricalCrossEntropy {
     

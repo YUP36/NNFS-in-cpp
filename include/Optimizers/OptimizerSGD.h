@@ -2,7 +2,7 @@
 #define OPTIMIZERSGD_H
 
 #include <Eigen/Dense>
-#include "DenseLayer.h"
+#include "../DenseLayer.h"
 
 class OptimizerSGD {
 

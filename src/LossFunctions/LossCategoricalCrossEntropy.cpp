@@ -1,4 +1,4 @@
-#include "../include/LossCategoricalCrossEntropy.h"
+#include "../../include/LossFunctions/LossCategoricalCrossEntropy.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXi;

@@ -1,4 +1,4 @@
-#include "../include/ActivationSoftmax.h"
+#include "../../include/ActivationFunctions/ActivationSoftmax.h"
 
 using Eigen::MatrixXd;
 using Eigen::RowVectorXd;

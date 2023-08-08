@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
-#include "../include/lodepng.h"
-#include "../include/ImageGenerator.h"
+#include "../../include/DataGeneration/lodepng.h"
+#include "../../include/DataGeneration/ImageGenerator.h"
 
 ImageGenerator::ImageGenerator() {}
 
