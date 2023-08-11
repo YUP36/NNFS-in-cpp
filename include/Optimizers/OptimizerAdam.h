@@ -2,7 +2,7 @@
 #define OPTIMIZERADAM_H
 
 #include <Eigen/Dense>
-#include "../DenseLayer.h"
+#include "../Layers/DenseLayer.h"
 
 class OptimizerAdam {
 

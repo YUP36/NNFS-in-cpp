@@ -5,7 +5,8 @@
 #include "../include/DataGeneration/ImageGenerator.h"
 #include "../include/DataGeneration/Spiral.h"
 
-#include "../include/DenseLayer.h"
+#include "../include/Layers/DenseLayer.h"
+#include "../include/Layers/DropoutLayer.h"
 
 #include "../include/ActivationFunctions/ActivationReLu.h"
 #include "../include/ActivationFunctions/ActivationSoftmax.h"
@@ -38,16 +39,14 @@ int main() {
     MatrixXd X = dataset.getX();
     VectorXi Y = dataset.getY();
 
-    DenseLayer layer1(2, 64);
+    DenseLayer layer1 = DenseLayer(2, 64, 0.0, 0.0, 5e-4, 5e-4);
     ActivationReLu activation1 = ActivationReLu();
-    DenseLayer layer2(64, 3);
-    // ActivationSoftmax activation2 = ActivationSoftmax();
-    // LossCategoricalCrossEntropy CCE = LossCategoricalCrossEntropy();
+    DropoutLayer dropout1 = DropoutLayer(0.1);
+    DenseLayer layer2 = DenseLayer(64, 3);
     ActivationSoftmaxLossCategoricalCrossEntropy activationLoss = ActivationSoftmaxLossCategoricalCrossEntropy();
-    // OptimizerSGD optimizer = OptimizerSGD(1.0);
     OptimizerAdam optimizer = OptimizerAdam(0.02, 1e-5);
 
-    double loss;
+    double loss, dataLoss, regularizationLoss;
     MatrixXd softmaxOutputs;
     VectorXd predictions = VectorXd::Zero(300);
     int matchCount;
@@ -55,15 +54,16 @@ int main() {
     for(int epoch = 0; epoch < 10001; epoch++){
 
         // auto start = high_resolution_clock::now();
-
         // FORWARD PASS
         layer1.forward(&X);
         activation1.forward(layer1.getOutput());
-        layer2.forward(activation1.getOutput());
-        // activation2.forward(layer2.getOutput());
-        // loss = CCE.calculate(layer2.getOutput(), &Y);
+        dropout1.forward(activation1.getOutput());
+        layer2.forward(dropout1.getOutput());
         activationLoss.forward(layer2.getOutput());
-        loss = activationLoss.calculate(&Y);
+        dataLoss = activationLoss.calculate(&Y);
+        regularizationLoss = activationLoss.getLossFunction()->calculateRegularizationLoss(&layer1)
+                            + activationLoss.getLossFunction()->calculateRegularizationLoss(&layer2);
+        loss = dataLoss + regularizationLoss;
 
         // ACCURACY CALCULATION
         softmaxOutputs = *(activationLoss.getOutput());
@@ -79,11 +79,10 @@ int main() {
         }
 
         // BACKPROPAGATION
-        // CCE.backward(activation2.getOutput(), &Y);
-        // activation2.backward(CCE.getDinputs());
         activationLoss.backward(activationLoss.getOutput(), &Y);
         layer2.backward(activationLoss.getDinputs());
-        activation1.backward(layer2.getDinputs());
+        dropout1.backward(layer2.getDinputs());
+        activation1.backward(dropout1.getDinputs());
         layer1.backward(activation1.getDinputs());
 
         // PARAMETER UPDATE
@@ -98,13 +97,44 @@ int main() {
         if((epoch % 100) == 0) {
             cout << "Epoch: " << epoch << "\t";
             cout << "Loss: " << loss << "\t";
+            cout << "Data loss: " << dataLoss << "\t";
+            cout << "Regularization loss: " << regularizationLoss << "\t";
             cout << "Accuracy: " << (double) matchCount / Y.rows() << endl;
             cout << optimizer.getLearningRate() << endl;
             // std::cout << duration.count() << std::endl;
         }
     }
 
-    // VISUALIZATION
+    //////////////////////////////////////////////////////////////////////
+    ///////////////////////////// TEST DATA //////////////////////////////
+
+    Spiral test(100, 3);
+    MatrixXd XTest = test.getX();
+    VectorXi YTest = test.getY();
+
+    layer1.forward(&XTest);
+    activation1.forward(layer1.getOutput());
+    layer2.forward(activation1.getOutput());
+    activationLoss.forward(layer2.getOutput());
+    loss = activationLoss.calculate(&YTest);
+
+    softmaxOutputs = *(activationLoss.getOutput());
+    for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
+        softmaxOutputs.row(rowIndex).maxCoeff(&maxRow);
+        predictions(rowIndex) = maxRow;
+    }
+    matchCount = 0;
+    for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
+        if(predictions(rowIndex) == Y(rowIndex)) {
+            matchCount++;
+        }
+    }
+    cout << "Test Data: \t Loss: " << loss << "\t";
+    cout << "Accuracy: " << (double) matchCount / Y.rows() << endl;
+    cout << optimizer.getLearningRate() << endl;
+    
+    //////////////////////////////////////////////////////////////////////////
+    ///////////////////////////// VISUALIZATION //////////////////////////////
     const int WIDTH = 1000;
     const int HEIGHT = 1000;
     MatrixXd inputGrid = MatrixXd(WIDTH * HEIGHT, 2);
@@ -137,7 +167,7 @@ int main() {
         }
     }
     ImageGenerator gen = ImageGenerator();
-    gen.createImage(pixels, "visualizations/adam/lr0.02dr1e-5.png", WIDTH, HEIGHT);
+    // gen.createImage(pixels, "visualizations/adam/512lr0.02dr1e-5wrdo0.1.png", WIDTH, HEIGHT);
 
     return 0;
 }

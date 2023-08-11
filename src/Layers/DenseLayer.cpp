@@ -1,10 +1,10 @@
-#include "../include/DenseLayer.h"
+#include "../../include/Layers/DenseLayer.h"
 
 using namespace std;
 using Eigen::MatrixXd;
 using Eigen::RowVectorXd;
 
-DenseLayer::DenseLayer(int numInputs, int numNeurons){
+DenseLayer::DenseLayer(int numInputs, int numNeurons, double l1w, double l1b, double l2w, double l2b){
     input = nullptr;
     output = nullptr;
 
@@ -27,6 +27,11 @@ DenseLayer::DenseLayer(int numInputs, int numNeurons){
     *weightCache = MatrixXd::Zero(numInputs, numNeurons);
     biasCache = new RowVectorXd(1, numNeurons);
     *biasCache = RowVectorXd::Zero(1, numNeurons);
+
+    lambdaL1Weight = l1w;
+    lambdaL1Bias = l1b;
+    lambdaL2Weight = l2w;
+    lambdaL2Bias = l2b;
 }
 
 ostream& operator<<(ostream& os, const DenseLayer& layer) {
@@ -70,9 +75,21 @@ MatrixXd* DenseLayer::getOutput() const {
 }
 
 void DenseLayer::backward(MatrixXd* dvalues) {
-    *dweights = input->transpose() * (*dvalues); // y don't we noramlize for sample size????
-
+    *dweights = input->transpose() * (*dvalues);
     *dbiases = dvalues->colwise().sum();
+
+    if(lambdaL1Weight > 0) {
+        *dweights += lambdaL1Weight * weights->unaryExpr([](double x){return (x > 0) ? 1.0 : -1.0;});
+    }
+    if(lambdaL1Bias > 0) {
+        *dbiases += lambdaL1Bias * biases->unaryExpr([](double x){return (x > 0) ? 1.0 : -1.0;});
+    }
+    if(lambdaL2Weight > 0) {
+        *dweights += 2 * lambdaL2Weight * *weights;
+    }
+    if(lambdaL2Bias > 0) {
+        *dbiases += 2 * lambdaL2Bias * *biases;
+    }
 
     if(!dinputs) dinputs = new MatrixXd(dvalues->rows(), weights->rows());
     *dinputs = (*dvalues) * weights->transpose();
@@ -128,4 +145,20 @@ void DenseLayer::setBiasCache(RowVectorXd* update) {
 
 void DenseLayer::updateBiasCache(RowVectorXd* update) {
     *biasCache += *update;
+}
+
+double DenseLayer::getLambdaL1Weight() const {
+    return lambdaL1Weight;
+}
+
+double DenseLayer::getLambdaL1Bias() const {
+    return lambdaL1Bias;
+}
+
+double DenseLayer::getLambdaL2Weight() const {
+    return lambdaL2Weight;
+}
+
+double DenseLayer::getLambdaL2Bias() const {
+    return lambdaL2Bias;
 }

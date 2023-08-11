@@ -7,9 +7,8 @@
 class DenseLayer {
 
     public:
-        DenseLayer(int numInputs, int numNeurons);
+        DenseLayer(int numInputs, int numNeurons, double l1w = 0.0, double l1b = 0.0, double l2w = 0.0, double l2b = 0.0);
         friend std::ostream& operator<<(std::ostream& os, const DenseLayer& layer);
-        void printLayer() const;
         
         Eigen::MatrixXd* getWeights() const;
         void setWeights(Eigen::MatrixXd* newWeights);
@@ -36,6 +35,11 @@ class DenseLayer {
         Eigen::RowVectorXd* getBiasCache() const;
         void setBiasCache(Eigen::RowVectorXd* update);
         void updateBiasCache(Eigen::RowVectorXd* update);
+
+        double getLambdaL1Weight() const;
+        double getLambdaL1Bias() const;
+        double getLambdaL2Weight() const;
+        double getLambdaL2Bias() const;
         
     private:
         Eigen::MatrixXd* input;
@@ -53,6 +57,11 @@ class DenseLayer {
 
         Eigen::MatrixXd* weightCache;
         Eigen::RowVectorXd* biasCache;
+
+        double lambdaL1Weight;
+        double lambdaL1Bias;
+        double lambdaL2Weight;
+        double lambdaL2Bias;
 };
 
 #endif

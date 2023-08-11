@@ -9,6 +9,9 @@ class ActivationSoftmaxLossCategoricalCrossEntropy {
     
     public:
         ActivationSoftmaxLossCategoricalCrossEntropy();
+        ActivationSoftmax* getActivationFunction();
+        LossCategoricalCrossEntropy* getLossFunction();
+
         void forward(Eigen::MatrixXd* inputs);
         Eigen::MatrixXd* getOutput() const;
         double calculate(Eigen::VectorXi* yTrue);

@@ -11,6 +11,14 @@ ActivationSoftmaxLossCategoricalCrossEntropy::ActivationSoftmaxLossCategoricalCr
     dinputs = nullptr;
 }
 
+ActivationSoftmax* ActivationSoftmaxLossCategoricalCrossEntropy::getActivationFunction() {
+    return &activation;
+}
+
+LossCategoricalCrossEntropy* ActivationSoftmaxLossCategoricalCrossEntropy::getLossFunction() {
+    return &loss;
+}
+
 void ActivationSoftmaxLossCategoricalCrossEntropy::forward(MatrixXd* inputs) {
     activation.forward(inputs);
 }
