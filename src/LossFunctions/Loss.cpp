@@ -6,8 +6,16 @@ using Eigen::VectorXd;
 
 Loss::Loss() {}
 
+double Loss::calculate(MatrixXd* yPredicted, MatrixXd* yTrue) {
+    return forward(yPredicted, yTrue).mean();
+}
+
 double Loss::calculate(MatrixXd* yPredicted, VectorXi* yTrue) {
     return forward(yPredicted, yTrue).mean();
+}
+
+VectorXd Loss::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
+    return VectorXd::Zero(yPredicted->rows());
 }
 
 VectorXd Loss::forward(MatrixXd* yPredicted, VectorXi* yTrue) {

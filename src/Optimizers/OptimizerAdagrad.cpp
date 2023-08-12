@@ -27,9 +27,9 @@ void OptimizerAdagrad::updateParameters(DenseLayer* layer) {
     layer->setBiasCache(&newBiasCache);
 
     MatrixXd weightUpdate = (-currentLearningRate * *layer->getDweights()).array()
-        / (MatrixXd::Constant(layer->getWeights()->rows(), layer->getWeights()->cols(), epsilon).array() + layer->getWeightCache()->array().sqrt());
+        / (epsilon + layer->getWeightCache()->array().sqrt());
     RowVectorXd biasUpdate = (-currentLearningRate * *layer->getDbiases()).array()
-        / (RowVectorXd::Constant(layer->getBiases()->rows(), layer->getBiases()->cols(), epsilon).array() + layer->getBiasCache()->array().sqrt());
+        / (epsilon + layer->getBiasCache()->array().sqrt());
 
     layer->updateWeights(&weightUpdate);
     layer->updateBiases(&biasUpdate);

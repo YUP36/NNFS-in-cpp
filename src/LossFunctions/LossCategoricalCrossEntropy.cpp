@@ -20,6 +20,8 @@ VectorXd LossCategoricalCrossEntropy::forward(MatrixXd* yPredicted, VectorXi* yT
 
     return (-1 * output.array().log());
 }
+// Required by compiler to define this overloaded function :(
+VectorXd LossCategoricalCrossEntropy::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {return VectorXd::Zero(yPredicted->rows());}
 
 void LossCategoricalCrossEntropy::backward(MatrixXd* yPredictions, VectorXi* yTrue) {
     int numSamples = yPredictions->rows();

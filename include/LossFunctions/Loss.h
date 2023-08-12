@@ -8,7 +8,9 @@ class Loss {
 
     public:
         Loss();
+        double calculate(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue);
         double calculate(Eigen::MatrixXd* yPredicted, Eigen::VectorXi* yTrue);
+        virtual Eigen::VectorXd forward(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue);
         virtual Eigen::VectorXd forward(Eigen::MatrixXd* yPredicted, Eigen::VectorXi* yTrue);
         double calculateRegularizationLoss(DenseLayer* layer);
 

@@ -42,9 +42,9 @@ void OptimizerAdam::updateParameters(DenseLayer* layer) {
     MatrixXd biasCacheCorrected = biasCache / (1 - pow(beta2, 1 + iteration));
 
     MatrixXd weightUpdate = (-currentLearningRate * weightMomentumCorrected.array())
-        / (MatrixXd::Constant(layer->getWeights()->rows(), layer->getWeights()->cols(), epsilon).array() + weightCacheCorrected.array().sqrt());
+        / (epsilon + weightCacheCorrected.array().sqrt());
     RowVectorXd biasUpdate = (-currentLearningRate * biasMomentumCorrected.array())
-        / (RowVectorXd::Constant(layer->getBiases()->rows(), layer->getBiases()->cols(), epsilon).array() + biasCacheCorrected.array().sqrt());
+        / (epsilon + biasCacheCorrected.array().sqrt());
 
     layer->updateWeights(&weightUpdate);
     layer->updateBiases(&biasUpdate);
