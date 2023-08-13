@@ -2,17 +2,15 @@
 #define LOSS_H
 
 #include <Eigen/Dense>
-#include "../Layers/DenseLayer.h"
+#include "../Layers/Dense.h"
 
 class Loss {
 
     public:
         Loss();
         double calculate(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue);
-        double calculate(Eigen::MatrixXd* yPredicted, Eigen::VectorXi* yTrue);
         virtual Eigen::VectorXd forward(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue);
-        virtual Eigen::VectorXd forward(Eigen::MatrixXd* yPredicted, Eigen::VectorXi* yTrue);
-        double calculateRegularizationLoss(DenseLayer* layer);
+        double calculateRegularizationLoss(Dense* layer);
 
 };
 

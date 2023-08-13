@@ -1,7 +1,6 @@
 #include "../../include/DataGeneration/Spiral.h"
 
 using Eigen::MatrixX2d;
-using Eigen::VectorXi;
 using Eigen::VectorXd;
 using Eigen::seqN;
 using Eigen::sin;
@@ -9,7 +8,7 @@ using Eigen::sin;
 Spiral::Spiral(int numSamples, int numClasses) {
     int numTotal = numSamples * numClasses;
     X = MatrixX2d::Zero(numTotal, 2);
-    Y = VectorXi::Zero(numTotal);
+    Y = VectorXd::Zero(numTotal);
 
     for(int classNum = 0; classNum < numClasses; classNum++) {
         VectorXd r = VectorXd::LinSpaced(numSamples, 0, 1);
@@ -19,7 +18,7 @@ Spiral::Spiral(int numSamples, int numClasses) {
         X(seqN(classNum * numSamples, numSamples), {0}) = r.array() * ((2.5 * theta).array().sin());
         X(seqN(classNum * numSamples, numSamples), {1}) = r.array() * ((2.5 * theta).array().cos());
 
-        Y.middleRows(classNum * numSamples, numSamples) = VectorXi::Constant(numSamples, classNum);
+        Y.middleRows(classNum * numSamples, numSamples) = VectorXd::Constant(numSamples, (double) classNum);
     }
 }
 
@@ -32,7 +31,7 @@ MatrixX2d Spiral::getX() const {
     return X;
 }
 
-VectorXi Spiral::getY() const {
+VectorXd Spiral::getY() const {
     return Y;
 }
 

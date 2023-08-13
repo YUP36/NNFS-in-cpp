@@ -5,19 +5,21 @@
 #include "../include/DataGeneration/ImageGenerator.h"
 #include "../include/DataGeneration/Spiral.h"
 
-#include "../include/Layers/DenseLayer.h"
-#include "../include/Layers/DropoutLayer.h"
+#include "../include/Layers/Dense.h"
+#include "../include/Layers/Dropout.h"
 
-#include "../include/ActivationFunctions/ActivationReLu.h"
-#include "../include/ActivationFunctions/ActivationSoftmax.h"
+#include "../include/ActivationFunctions/ReLu.h"
+#include "../include/ActivationFunctions/Softmax.h"
+#include "../include/ActivationFunctions/Sigmoid.h"
 
-#include "../include/LossFunctions/LossCategoricalCrossEntropy.h"
-#include "../include/LossFunctions/ActivationSoftmaxLossCategoricalCrossEntropy.h"
+#include "../include/LossFunctions/CategoricalCrossEntropy.h"
+#include "../include/LossFunctions/SoftmaxCategoricalCrossEntropy.h"
+#include "../include/LossFunctions/BinaryCrossEntropy.h"
 
-#include "../include/Optimizers/OptimizerSGD.h"
-#include "../include/Optimizers/OptimizerAdagrad.h"
-#include "../include/Optimizers/OptimizerRMSProp.h"
-#include "../include/Optimizers/OptimizerAdam.h"
+#include "../include/Optimizers/SGD.h"
+#include "../include/Optimizers/Adagrad.h"
+#include "../include/Optimizers/RMSProp.h"
+#include "../include/Optimizers/Adam.h"
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -37,14 +39,14 @@ int main() {
 
     Spiral dataset(100, 3);
     MatrixXd X = dataset.getX();
-    VectorXi Y = dataset.getY();
+    MatrixXd Y = dataset.getY();
 
-    DenseLayer layer1 = DenseLayer(2, 64, 0.0, 0.0, 5e-4, 5e-4);
-    ActivationReLu activation1 = ActivationReLu();
-    DropoutLayer dropout1 = DropoutLayer(0.1);
-    DenseLayer layer2 = DenseLayer(64, 3);
-    ActivationSoftmaxLossCategoricalCrossEntropy activationLoss = ActivationSoftmaxLossCategoricalCrossEntropy();
-    OptimizerAdam optimizer = OptimizerAdam(0.02, 1e-5);
+    Dense Dense1 = Dense(2, 64, 0.0, 0.0, 5e-4, 5e-4);
+    ReLu activation1 = ReLu();
+    Dropout dropout1 = Dropout(0.1);
+    Dense Dense2 = Dense(64, 3);
+    SoftmaxCategoricalCrossEntropy activationLoss = SoftmaxCategoricalCrossEntropy();
+    Adam optimizer = Adam(0.02, 1e-5);
 
     double loss, dataLoss, regularizationLoss;
     MatrixXd softmaxOutputs;
@@ -55,14 +57,14 @@ int main() {
 
         // auto start = high_resolution_clock::now();
         // FORWARD PASS
-        layer1.forward(&X);
-        activation1.forward(layer1.getOutput());
+        Dense1.forward(&X);
+        activation1.forward(Dense1.getOutput());
         dropout1.forward(activation1.getOutput());
-        layer2.forward(dropout1.getOutput());
-        activationLoss.forward(layer2.getOutput());
+        Dense2.forward(dropout1.getOutput());
+        activationLoss.forward(Dense2.getOutput());
         dataLoss = activationLoss.calculate(&Y);
-        regularizationLoss = activationLoss.getLossFunction()->calculateRegularizationLoss(&layer1)
-                            + activationLoss.getLossFunction()->calculateRegularizationLoss(&layer2);
+        regularizationLoss = activationLoss.getLossFunction()->calculateRegularizationLoss(&Dense1)
+                            + activationLoss.getLossFunction()->calculateRegularizationLoss(&Dense2);
         loss = dataLoss + regularizationLoss;
 
         // ACCURACY CALCULATION
@@ -80,15 +82,15 @@ int main() {
 
         // BACKPROPAGATION
         activationLoss.backward(activationLoss.getOutput(), &Y);
-        layer2.backward(activationLoss.getDinputs());
-        dropout1.backward(layer2.getDinputs());
+        Dense2.backward(activationLoss.getDinputs());
+        dropout1.backward(Dense2.getDinputs());
         activation1.backward(dropout1.getDinputs());
-        layer1.backward(activation1.getDinputs());
+        Dense1.backward(activation1.getDinputs());
 
         // PARAMETER UPDATE
         optimizer.decay();
-        optimizer.updateParameters(&layer1);
-        optimizer.updateParameters(&layer2);
+        optimizer.updateParameters(&Dense1);
+        optimizer.updateParameters(&Dense2);
         optimizer.incrementIteration();
 
         // auto stop = high_resolution_clock::now();
@@ -110,12 +112,12 @@ int main() {
 
     Spiral test(100, 3);
     MatrixXd XTest = test.getX();
-    VectorXi YTest = test.getY();
+    MatrixXd YTest = test.getY();
 
-    layer1.forward(&XTest);
-    activation1.forward(layer1.getOutput());
-    layer2.forward(activation1.getOutput());
-    activationLoss.forward(layer2.getOutput());
+    Dense1.forward(&XTest);
+    activation1.forward(Dense1.getOutput());
+    Dense2.forward(activation1.getOutput());
+    activationLoss.forward(Dense2.getOutput());
     loss = activationLoss.calculate(&YTest);
 
     softmaxOutputs = *(activationLoss.getOutput());
@@ -145,10 +147,10 @@ int main() {
         }
     }
 
-    layer1.forward(&inputGrid);
-    activation1.forward(layer1.getOutput());
-    layer2.forward(activation1.getOutput());
-    activationLoss.forward(layer2.getOutput());
+    Dense1.forward(&inputGrid);
+    activation1.forward(Dense1.getOutput());
+    Dense2.forward(activation1.getOutput());
+    activationLoss.forward(Dense2.getOutput());
 
     std::vector<unsigned char> pixels(WIDTH * HEIGHT * 4); // RGBA format
     RowVectorXd pix = RowVectorXd(1, 3);

@@ -11,11 +11,11 @@ class Spiral {
         friend std::ostream& operator<<(std::ostream& os, const Spiral& dataset);
         void printData() const;
         Eigen::MatrixX2d getX() const;
-        Eigen::VectorXi getY() const;
+        Eigen::VectorXd getY() const;
         
     private:
         Eigen::MatrixX2d X;
-        Eigen::VectorXi Y;
+        Eigen::VectorXd Y;
 
 };
 
