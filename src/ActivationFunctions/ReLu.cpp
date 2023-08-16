@@ -8,18 +8,20 @@ ReLu::ReLu() {
     dinputs = nullptr;
 }
 
+void ReLu::forward(MatrixXd* in) {
+    if(!input) input = new MatrixXd(in->rows(), in->cols());
+    *input = *in;
+    if(!output) output = new MatrixXd(in->rows(), in->cols());
+    *output = in->unaryExpr([](double x){return std::max(0.0, x);});
+}
+
 MatrixXd* ReLu::getOutput() const {
     return output;
 }
 
-void ReLu::forward(MatrixXd* in) {
-    input = in;
-    if(!output) output = new MatrixXd(input->rows(), input->cols());
-    *output = input->unaryExpr([](double x){return std::max(0.0, x);});
-}
-
 void ReLu::backward(MatrixXd* dvalues) {
-    dinputs = dvalues;
+    if(!dinputs) dinputs = new MatrixXd(dvalues->rows(), dvalues->cols());
+    *dinputs = *dvalues;
     for(int i = 0; i < input->rows(); i++) {
         for(int j = 0; j < input->cols(); j++) {
             if((*input)(i, j) < 0) {
@@ -27,7 +29,6 @@ void ReLu::backward(MatrixXd* dvalues) {
             }
         }
     }
-    // dinputs = dvalues.cwiseProduct(inputs.unaryExpr([](double x){return (x > 0) ? 1 : 0;}));
 }
 
 MatrixXd* ReLu::getDinputs() const {

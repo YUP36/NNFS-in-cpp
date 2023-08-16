@@ -4,6 +4,7 @@
 #include "../include/DataGeneration/lodepng.h"
 #include "../include/DataGeneration/ImageGenerator.h"
 #include "../include/DataGeneration/Spiral.h"
+#include "../include/DataGeneration/Sine.h"
 
 #include "../include/Layers/Dense.h"
 #include "../include/Layers/Dropout.h"
@@ -11,10 +12,13 @@
 #include "../include/ActivationFunctions/ReLu.h"
 #include "../include/ActivationFunctions/Softmax.h"
 #include "../include/ActivationFunctions/Sigmoid.h"
+#include "../include/ActivationFunctions/Linear.h"
 
 #include "../include/LossFunctions/CategoricalCrossEntropy.h"
 #include "../include/LossFunctions/SoftmaxCategoricalCrossEntropy.h"
 #include "../include/LossFunctions/BinaryCrossEntropy.h"
+#include "../include/LossFunctions/MeanAbsoluteError.h"
+#include "../include/LossFunctions/MeanSquaredError.h"
 
 #include "../include/Optimizers/SGD.h"
 #include "../include/Optimizers/Adagrad.h"
@@ -37,60 +41,65 @@ using namespace std::chrono;
 int main() {
     srand(1);
 
-    Spiral dataset(100, 3);
+    Sine dataset = Sine();
     MatrixXd X = dataset.getX();
     MatrixXd Y = dataset.getY();
 
-    Dense Dense1 = Dense(2, 64, 0.0, 0.0, 5e-4, 5e-4);
+    Dense dense1 = Dense(1, 64);
     ReLu activation1 = ReLu();
-    Dropout dropout1 = Dropout(0.1);
-    Dense Dense2 = Dense(64, 3);
-    SoftmaxCategoricalCrossEntropy activationLoss = SoftmaxCategoricalCrossEntropy();
-    Adam optimizer = Adam(0.02, 1e-5);
+    Dense dense2 = Dense(64, 64);
+    ReLu activation2 = ReLu();
+    Dense dense3 = Dense(64, 1);
+    Linear activation3 = Linear();
+    MeanSquaredError lossFunction = MeanSquaredError();
 
+    Adam optimizer = Adam(0.003, 1e-3);
+    
+    double standardDeviation = (Y.array() - Y.mean()).square().sum() / Y.rows();
+    double precision = standardDeviation / 250.0;
+    cout << precision << endl;
     double loss, dataLoss, regularizationLoss;
-    MatrixXd softmaxOutputs;
-    VectorXd predictions = VectorXd::Zero(300);
+    MatrixXd outputs;
+    // VectorXd predictions = VectorXd::Zero(200);
     int matchCount;
-    Eigen::Index maxRow;
+    // Eigen::Index maxRow;
     for(int epoch = 0; epoch < 10001; epoch++){
 
         // auto start = high_resolution_clock::now();
         // FORWARD PASS
-        Dense1.forward(&X);
-        activation1.forward(Dense1.getOutput());
-        dropout1.forward(activation1.getOutput());
-        Dense2.forward(dropout1.getOutput());
-        activationLoss.forward(Dense2.getOutput());
-        dataLoss = activationLoss.calculate(&Y);
-        regularizationLoss = activationLoss.getLossFunction()->calculateRegularizationLoss(&Dense1)
-                            + activationLoss.getLossFunction()->calculateRegularizationLoss(&Dense2);
+        dense1.forward(&X);
+        activation1.forward(dense1.getOutput());
+        dense2.forward(activation1.getOutput());
+        activation2.forward(dense2.getOutput());
+        dense3.forward(activation2.getOutput());
+        activation3.forward(dense3.getOutput());
+        lossFunction.forward(activation3.getOutput(), &Y);
+
+        dataLoss = lossFunction.calculate(activation3.getOutput(), &Y);
+        regularizationLoss = lossFunction.calculateRegularizationLoss(&dense1)
+                            + lossFunction.calculateRegularizationLoss(&dense2)
+                            + lossFunction.calculateRegularizationLoss(&dense3);
         loss = dataLoss + regularizationLoss;
 
         // ACCURACY CALCULATION
-        softmaxOutputs = *(activationLoss.getOutput());
-        for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
-            softmaxOutputs.row(rowIndex).maxCoeff(&maxRow);
-            predictions(rowIndex) = maxRow;
-        }
-        matchCount = 0;
-        for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
-            if(predictions(rowIndex) == Y(rowIndex)) {
-                matchCount++;
-            }
-        }
+        outputs = *(activation3.getOutput());
+        MatrixXd difference = (outputs - Y).array().abs();
+        matchCount = difference.unaryExpr([precision](double x){return (x < precision) ? 1.0 : 0.0;}).sum();
 
         // BACKPROPAGATION
-        activationLoss.backward(activationLoss.getOutput(), &Y);
-        Dense2.backward(activationLoss.getDinputs());
-        dropout1.backward(Dense2.getDinputs());
-        activation1.backward(dropout1.getDinputs());
-        Dense1.backward(activation1.getDinputs());
+        lossFunction.backward(activation3.getOutput(), &Y);
+        activation3.backward(lossFunction.getDinputs());
+        dense3.backward(activation3.getDinputs());
+        activation2.backward(dense3.getDinputs());
+        dense2.backward(activation2.getDinputs());
+        activation1.backward(dense2.getDinputs());
+        dense1.backward(activation1.getDinputs());
 
         // PARAMETER UPDATE
         optimizer.decay();
-        optimizer.updateParameters(&Dense1);
-        optimizer.updateParameters(&Dense2);
+        optimizer.updateParameters(&dense1);
+        optimizer.updateParameters(&dense2);
+        optimizer.updateParameters(&dense3);
         optimizer.incrementIteration();
 
         // auto stop = high_resolution_clock::now();
@@ -102,7 +111,7 @@ int main() {
             cout << "Data loss: " << dataLoss << "\t";
             cout << "Regularization loss: " << regularizationLoss << "\t";
             cout << "Accuracy: " << (double) matchCount / Y.rows() << endl;
-            cout << optimizer.getLearningRate() << endl;
+            // cout << optimizer.getLearningRate() << endl;
             // std::cout << duration.count() << std::endl;
         }
     }
@@ -110,66 +119,65 @@ int main() {
     //////////////////////////////////////////////////////////////////////
     ///////////////////////////// TEST DATA //////////////////////////////
 
-    Spiral test(100, 3);
+    Spiral test(100, 2);
     MatrixXd XTest = test.getX();
     MatrixXd YTest = test.getY();
 
-    Dense1.forward(&XTest);
-    activation1.forward(Dense1.getOutput());
-    Dense2.forward(activation1.getOutput());
-    activationLoss.forward(Dense2.getOutput());
-    loss = activationLoss.calculate(&YTest);
+    dense1.forward(&X);
+    activation1.forward(dense1.getOutput());
+    dense2.forward(activation1.getOutput());
+    activation2.forward(dense2.getOutput());
+    dense3.forward(activation2.getOutput());
+    activation3.forward(dense3.getOutput());
+    lossFunction.forward(activation3.getOutput(), &Y);
+    
+    dataLoss = lossFunction.calculate(activation3.getOutput(), &Y);
+    regularizationLoss = lossFunction.calculateRegularizationLoss(&dense1)
+                        + lossFunction.calculateRegularizationLoss(&dense2)
+                        + lossFunction.calculateRegularizationLoss(&dense3);
+    loss = dataLoss + regularizationLoss;
 
-    softmaxOutputs = *(activationLoss.getOutput());
-    for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
-        softmaxOutputs.row(rowIndex).maxCoeff(&maxRow);
-        predictions(rowIndex) = maxRow;
-    }
-    matchCount = 0;
-    for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
-        if(predictions(rowIndex) == Y(rowIndex)) {
-            matchCount++;
-        }
-    }
+    outputs = *(activation3.getOutput());
+    MatrixXd difference = (outputs - Y).array().abs();
+    matchCount = difference.unaryExpr([precision](double x){return (x < precision) ? 1.0 : 0.0;}).sum();
+    
     cout << "Test Data: \t Loss: " << loss << "\t";
     cout << "Accuracy: " << (double) matchCount / Y.rows() << endl;
-    cout << optimizer.getLearningRate() << endl;
+    // cout << optimizer.getLearningRate() << endl;
     
     //////////////////////////////////////////////////////////////////////////
     ///////////////////////////// VISUALIZATION //////////////////////////////
-    const int WIDTH = 1000;
-    const int HEIGHT = 1000;
-    MatrixXd inputGrid = MatrixXd(WIDTH * HEIGHT, 2);
-    for(int y = 0; y < HEIGHT; y++) {
-        for(int x = 0; x < WIDTH; x++) {
-            inputGrid((y * HEIGHT) + x, 0) = (x * 2.0 / WIDTH) - 1;
-            inputGrid((y * HEIGHT) + x, 1) = (y * 2.0 / HEIGHT) - 1;
-        }
-    }
+    // const int WIDTH = 1000;
+    // const int HEIGHT = 1000;
+    // MatrixXd inputGrid = MatrixXd(WIDTH * HEIGHT, 2);
+    // for(int y = 0; y < HEIGHT; y++) {
+    //     for(int x = 0; x < WIDTH; x++) {
+    //         inputGrid((y * HEIGHT) + x, 0) = (x * 2.0 / WIDTH) - 1;
+    //         inputGrid((y * HEIGHT) + x, 1) = (y * 2.0 / HEIGHT) - 1;
+    //     }
+    // }
 
-    Dense1.forward(&inputGrid);
-    activation1.forward(Dense1.getOutput());
-    Dense2.forward(activation1.getOutput());
-    activationLoss.forward(Dense2.getOutput());
+    // dense1.forward(&inputGrid);
+    // activation1.forward(dense1.getOutput());
+    // dense2.forward(activation1.getOutput());
+    // activation2.forward(dense2.getOutput());
 
-    std::vector<unsigned char> pixels(WIDTH * HEIGHT * 4); // RGBA format
-    RowVectorXd pix = RowVectorXd(1, 3);
-    for (int y = 0; y < HEIGHT; ++y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            int index = 4 * (y * WIDTH + x);
-            pix = activationLoss.getOutput()->row(y * HEIGHT + x);
-            // green: 109, 209, 129
-            // red: 255, 130, 130
-            // blue: 72, 133, 232
-            pixels[index + 0] = sqrt(109 * 109 * pix(0) + 255 * 255 * pix(1) + 72 * 72 * pix(2));
-            pixels[index + 1] = sqrt(209 * 209 * pix(0) + 130 * 130 * pix(1) + 133 * 133 * pix(2));
-            pixels[index + 2] = sqrt(129 * 129 * pix(0) + 130 * 130 * pix(1) + 232 * 232 * pix(2));
-            pixels[index + 3] = 255; // Alpha channel (opacity: 255 = fully opaque)
-            // pixels[4 * (y * WIDTH + x) + gridPredictions(HEIGHT * y + x, 0)] = 255;
-        }
-    }
-    ImageGenerator gen = ImageGenerator();
-    // gen.createImage(pixels, "visualizations/adam/512lr0.02dr1e-5wrdo0.1.png", WIDTH, HEIGHT);
+    // std::vector<unsigned char> pixels(WIDTH * HEIGHT * 4); // RGBA format
+    // double pix;
+    // for (int y = 0; y < HEIGHT; ++y) {
+    //     for (int x = 0; x < WIDTH; ++x) {
+    //         int index = 4 * (y * WIDTH + x);
+    //         pix = (*(activation2.getOutput()))(y * HEIGHT + x, 0);
+    //         // green: 109, 209, 129
+    //         // red: 255, 130, 130
+    //         pixels[index + 0] = sqrt(109 * 109 * pix + 255 * 255 * (1 - pix));
+    //         pixels[index + 1] = sqrt(209 * 209 * pix + 130 * 130 * (1 - pix));
+    //         pixels[index + 2] = sqrt(129 * 129 * pix + 130 * 130 * (1 - pix));
+    //         pixels[index + 3] = 255; // Alpha channel (opacity: 255 = fully opaque)
+    //     }
+    // }
+    // ImageGenerator gen = ImageGenerator();
+    // gen.createImage(pixels, "visualizations/adam/binaryCrossEntropylr0.01dr5e-7.png", WIDTH, HEIGHT);
 
     return 0;
 }

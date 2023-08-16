@@ -21,14 +21,14 @@ VectorXd CategoricalCrossEntropy::forward(MatrixXd* yPredicted, MatrixXd* yTrue)
     return (-1 * output.array().log());
 }
 
-void CategoricalCrossEntropy::backward(MatrixXd* yPredictions, VectorXi* yTrue) {
-    int numSamples = yPredictions->rows();
-    int numLabels = yPredictions->cols();
+void CategoricalCrossEntropy::backward(MatrixXd* yPredicted, VectorXi* yTrue) {
+    int numSamples = yPredicted->rows();
+    int numLabels = yPredicted->cols();
     MatrixXd identity = MatrixXd::Identity(numLabels, numLabels);
     MatrixXd oneHotYTrue = identity(*yTrue, all);
     
     if(!dinputs) dinputs = new MatrixXd(numSamples, numLabels);
-    *dinputs = (oneHotYTrue.array() / yPredictions->array()) / (-numSamples);
+    *dinputs = (oneHotYTrue.array() / yPredicted->array()) / (-numSamples);
 }
 
 MatrixXd* CategoricalCrossEntropy::getDinputs() const {

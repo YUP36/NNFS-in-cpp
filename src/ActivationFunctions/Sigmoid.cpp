@@ -1,5 +1,6 @@
 #include "../../include/ActivationFunctions/Sigmoid.h"
 
+#include <iostream>
 using Eigen::MatrixXd;
 
 Sigmoid::Sigmoid() {

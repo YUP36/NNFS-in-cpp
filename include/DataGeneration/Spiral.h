@@ -9,7 +9,6 @@ class Spiral {
     public:
         Spiral(int numSamples, int numClasses);
         friend std::ostream& operator<<(std::ostream& os, const Spiral& dataset);
-        void printData() const;
         Eigen::MatrixX2d getX() const;
         Eigen::VectorXd getY() const;
         

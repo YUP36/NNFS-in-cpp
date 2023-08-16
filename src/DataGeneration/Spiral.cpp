@@ -3,7 +3,6 @@
 using Eigen::MatrixX2d;
 using Eigen::VectorXd;
 using Eigen::seqN;
-using Eigen::sin;
 
 Spiral::Spiral(int numSamples, int numClasses) {
     int numTotal = numSamples * numClasses;

@@ -7,7 +7,7 @@
 class Adam {
 
     public:
-        Adam(double lr = 1.0, double dr = 0.0, double e = 1e-7, double b1 = 0.9, double b2 = 0.999);
+        Adam(double lr = 0.001, double dr = 0.0, double e = 1e-7, double b1 = 0.9, double b2 = 0.999);
         double getLearningRate();
         void decay();
         void updateParameters(Dense* layer);

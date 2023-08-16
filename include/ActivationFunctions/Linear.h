@@ -1,17 +1,19 @@
-#ifndef SOFTMAX_H
-#define SOFTMAX_H
+#ifndef Linear_H
+#define Linear_H
 
 #include <Eigen/Dense>
 
-class Softmax {
+class Linear {
 
     public:
-        Softmax();
+        Linear();
+
+        void forward(Eigen::MatrixXd* in);
         Eigen::MatrixXd* getOutput() const;
-        Eigen::MatrixXd* getDinputs() const;
-        void forward(Eigen::MatrixXd* input);
+
         void backward(Eigen::MatrixXd* dvalues);
-        
+        Eigen::MatrixXd* getDinputs() const;
+
     private:
         Eigen::MatrixXd* output;
         Eigen::MatrixXd* dinputs;

@@ -9,7 +9,7 @@ Dense::Dense(int numInputs, int numNeurons, double l1w, double l1b, double l2w, 
     output = nullptr;
 
     weights = new MatrixXd(numInputs, numNeurons);
-    *weights = MatrixXd::Random(numInputs, numNeurons);
+    *weights = 0.1 * MatrixXd::Random(numInputs, numNeurons);
 
     biases = new RowVectorXd(1, numNeurons);
     *biases = RowVectorXd::Zero(1, numNeurons);
@@ -77,7 +77,7 @@ MatrixXd* Dense::getOutput() const {
 void Dense::backward(MatrixXd* dvalues) {
     *dweights = input->transpose() * (*dvalues);
     *dbiases = dvalues->colwise().sum();
-
+    
     if(lambdaL1Weight > 0) {
         *dweights += lambdaL1Weight * weights->unaryExpr([](double x){return (x > 0) ? 1.0 : -1.0;});
     }

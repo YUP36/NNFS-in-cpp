@@ -7,8 +7,10 @@ class ReLu {
 
     public:
         ReLu();
+
+        void forward(Eigen::MatrixXd* in);
         Eigen::MatrixXd* getOutput() const;
-        void forward(Eigen::MatrixXd* input);
+
         void backward(Eigen::MatrixXd* dvalues);
         Eigen::MatrixXd* getDinputs() const;
 

@@ -98,5 +98,6 @@
         "splines": "cpp",
         "*.inc": "cpp",
         "*.expression": "cpp"
-    }
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }
