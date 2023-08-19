@@ -3,15 +3,16 @@
 
 #include <Eigen/Dense>
 #include "../Layers/Dense.h"
+#include "../ModelWrappers/Optimizer.h"
 
-class Adagrad {
+class Adagrad : public Optimizer {
 
     public:
         Adagrad(double lr = 1.0, double dr = 0.0, double e = 1e-7);
         double getLearningRate();
-        void decay();
-        void updateParameters(Dense* layer);
-        void incrementIteration();
+        void decay() override;
+        void updateParameters(Dense* layer) override;
+        void incrementIteration() override;
 
     private:
         double learningRate;

@@ -2,7 +2,7 @@
 #define MEANABSOLUTEERROR_H
 
 #include <Eigen/Dense>
-#include "Loss.h"
+#include "../ModelWrappers/Loss.h"
 
 class MeanAbsoluteError : public Loss {
 

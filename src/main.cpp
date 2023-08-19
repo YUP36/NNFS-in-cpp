@@ -15,7 +15,6 @@
 #include "../include/ActivationFunctions/Linear.h"
 
 #include "../include/LossFunctions/CategoricalCrossEntropy.h"
-#include "../include/LossFunctions/SoftmaxCategoricalCrossEntropy.h"
 #include "../include/LossFunctions/BinaryCrossEntropy.h"
 #include "../include/LossFunctions/MeanAbsoluteError.h"
 #include "../include/LossFunctions/MeanSquaredError.h"
@@ -24,6 +23,12 @@
 #include "../include/Optimizers/Adagrad.h"
 #include "../include/Optimizers/RMSProp.h"
 #include "../include/Optimizers/Adam.h"
+
+#include "../include/ModelWrappers/SoftmaxCategoricalCrossEntropy.h"
+#include "../include/ModelWrappers/Model.h"
+#include "../include/ModelWrappers/Layer.h"
+#include "../include/ModelWrappers/Optimizer.h"
+#include "../include/ModelWrappers/Loss.h"
 
 using namespace std;
 using Eigen::MatrixXd;

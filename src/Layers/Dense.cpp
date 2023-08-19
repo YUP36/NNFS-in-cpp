@@ -34,6 +34,10 @@ Dense::Dense(int numInputs, int numNeurons, double l1w, double l1b, double l2w, 
     lambdaL2Bias = l2b;
 }
 
+std::string Dense::getName() const {
+    return "Dense";
+}
+
 ostream& operator<<(ostream& os, const Dense& layer) {
     os << "Weights:\n" << layer.getWeights() << std::endl << "Biases:\n" << layer.getBiases() << endl;
     return os;

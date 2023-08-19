@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <Eigen/Dense>
+#include "../ModelWrappers/Layer.h"
 
-class Dense {
+class Dense : public Layer {
 
     public:
         Dense(int numInputs, int numNeurons, double l1w = 0.0, double l1b = 0.0, double l2w = 0.0, double l2b = 0.0);
+        std::string getName() const override;
         friend std::ostream& operator<<(std::ostream& os, const Dense& layer);
         
         Eigen::MatrixXd* getWeights() const;
@@ -16,11 +18,11 @@ class Dense {
         Eigen::RowVectorXd* getBiases() const;
         void setBiases(Eigen::RowVectorXd* newBiases);
         void updateBiases(Eigen::RowVectorXd* biasesUpdate);
-        void forward(Eigen::MatrixXd* in);
-        Eigen::MatrixXd* getOutput() const;
+        void forward(Eigen::MatrixXd* in) override;
+        Eigen::MatrixXd* getOutput() const override;
 
-        void backward(Eigen::MatrixXd* dvalues);
-        Eigen::MatrixXd* getDinputs() const;
+        void backward(Eigen::MatrixXd* dvalues) override;
+        Eigen::MatrixXd* getDinputs() const override;
         Eigen::MatrixXd* getDweights() const;
         Eigen::RowVectorXd* getDbiases() const;
 

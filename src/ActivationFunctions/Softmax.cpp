@@ -1,11 +1,16 @@
 #include "../../include/ActivationFunctions/Softmax.h"
 
 using Eigen::MatrixXd;
+using Eigen::VectorXd;
 using Eigen::RowVectorXd;
 
 Softmax::Softmax() {
     dinputs = nullptr;
     output = nullptr;
+}
+
+std::string Softmax::getName() const {
+    return "Softmax";
 }
 
 void Softmax::forward(MatrixXd* input) {
@@ -19,6 +24,16 @@ void Softmax::forward(MatrixXd* input) {
 
 Eigen::MatrixXd* Softmax::getOutput() const {
     return output;
+}
+
+MatrixXd Softmax::getPredictions() const {
+    VectorXd predictions = VectorXd::Zero(output->rows());
+    int maxRow;
+    for(int rowIndex = 0; rowIndex < predictions.rows(); rowIndex++) {
+        output->row(rowIndex).maxCoeff(&maxRow);
+        predictions(rowIndex) = maxRow;
+    }
+    return predictions;
 }
 
 void Softmax::backward(MatrixXd* dvalues) {

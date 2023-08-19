@@ -7,6 +7,10 @@ Linear::Linear() {
     dinputs = nullptr;
 }
 
+std::string Linear::getName() const {
+    return "Linear";
+}
+
 void Linear::forward(MatrixXd* in) {
     if(!output) output = new MatrixXd(in->rows(), in->cols());
     *output = *in;
@@ -14,6 +18,10 @@ void Linear::forward(MatrixXd* in) {
 
 MatrixXd* Linear::getOutput() const {
     return output;
+}
+
+MatrixXd Linear::getPredictions() const {
+    return *output;
 }
 
 void Linear::backward(MatrixXd* dvalues) {

@@ -1,4 +1,4 @@
-#include "../../include/LossFunctions/SoftmaxCategoricalCrossEntropy.h"
+#include "../../include/ModelWrappers/SoftmaxCategoricalCrossEntropy.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;

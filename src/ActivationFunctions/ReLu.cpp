@@ -8,6 +8,10 @@ ReLu::ReLu() {
     dinputs = nullptr;
 }
 
+std::string ReLu::getName() const {
+    return "ReLu";
+}
+
 void ReLu::forward(MatrixXd* in) {
     if(!input) input = new MatrixXd(in->rows(), in->cols());
     *input = *in;
@@ -17,6 +21,10 @@ void ReLu::forward(MatrixXd* in) {
 
 MatrixXd* ReLu::getOutput() const {
     return output;
+}
+
+MatrixXd ReLu::getPredictions() const {
+    return *output;
 }
 
 void ReLu::backward(MatrixXd* dvalues) {

@@ -14,6 +14,10 @@ Dropout::Dropout(double r) {
     dinputs = nullptr;
 }
 
+std::string Dropout::getName() const {
+    return "Dropout";
+}
+
 void Dropout::forward(MatrixXd* in) {
     if(!mask) mask = new MatrixXd(in->rows(), in->cols());
     *mask = MatrixXd::Constant(in->rows(), in->cols(), 1.0 / (1 - dropoutRate));
@@ -29,7 +33,7 @@ void Dropout::forward(MatrixXd* in) {
     *output = in->array() * mask->array();
 }
 
-MatrixXd* Dropout::getOutput() {
+MatrixXd* Dropout::getOutput() const {
     return output;
 }
 
@@ -38,6 +42,6 @@ void Dropout::backward(MatrixXd* dvalues) {
     *dinputs = dvalues->array() * mask->array();
 }
 
-MatrixXd* Dropout::getDinputs() {
+MatrixXd* Dropout::getDinputs() const {
     return dinputs;
 }

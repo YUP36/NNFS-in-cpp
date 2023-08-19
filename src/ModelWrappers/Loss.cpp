@@ -1,4 +1,4 @@
-#include "../../include/LossFunctions/Loss.h"
+#include "../../include/ModelWrappers/Loss.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;

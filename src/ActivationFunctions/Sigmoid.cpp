@@ -8,6 +8,10 @@ Sigmoid::Sigmoid() {
     dinputs = nullptr;
 }
 
+std::string Sigmoid::getName() const {
+    return "Sigmoid";
+}
+
 void Sigmoid::forward(MatrixXd* in) {
     if(!output) output = new MatrixXd(in->rows(), in->cols());
     *output = 1 / (1 + (-in->array()).exp());
@@ -15,6 +19,10 @@ void Sigmoid::forward(MatrixXd* in) {
 
 MatrixXd* Sigmoid::getOutput() const {
     return output;
+}
+
+MatrixXd Sigmoid::getPredictions() const {
+    return output->unaryExpr([](double x){return (x > 0.5) ? 1.0 : 0.0;});
 }
 
 void Sigmoid::backward(MatrixXd* dvalues) {

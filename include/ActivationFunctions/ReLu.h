@@ -2,17 +2,21 @@
 #define RELU_H
 
 #include <Eigen/Dense>
+#include "../ModelWrappers/Layer.h"
+#include "../ModelWrappers/Activation.h"
 
-class ReLu {
+class ReLu : public Layer, public Activation {
 
     public:
         ReLu();
+        std::string getName() const override;
 
-        void forward(Eigen::MatrixXd* in);
-        Eigen::MatrixXd* getOutput() const;
+        void forward(Eigen::MatrixXd* in) override;
+        Eigen::MatrixXd* getOutput() const override;
+        Eigen::MatrixXd getPredictions() const override;
 
-        void backward(Eigen::MatrixXd* dvalues);
-        Eigen::MatrixXd* getDinputs() const;
+        void backward(Eigen::MatrixXd* dvalues) override;
+        Eigen::MatrixXd* getDinputs() const override;
 
     private:
         Eigen::MatrixXd* input;

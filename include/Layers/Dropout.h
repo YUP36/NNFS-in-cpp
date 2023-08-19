@@ -2,16 +2,20 @@
 #define DROPOUT_H
 
 #include <Eigen/Dense>
+#include "../ModelWrappers/Layer.h"
 
-class Dropout {
+class Dropout : public Layer {
     // dropout rate only has accuracy to 5 decimal places
 
     public:
         Dropout(double r);
-        void forward(Eigen::MatrixXd* in);
-        Eigen::MatrixXd* getOutput();
-        void backward(Eigen::MatrixXd* dvalues);
-        Eigen::MatrixXd* getDinputs();
+        std::string getName() const override;
+
+        void forward(Eigen::MatrixXd* in) override;
+        Eigen::MatrixXd* getOutput() const override;
+
+        void backward(Eigen::MatrixXd* dvalues) override;
+        Eigen::MatrixXd* getDinputs() const override;
 
     private:
         double dropoutRate;

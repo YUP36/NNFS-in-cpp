@@ -2,15 +2,21 @@
 #define SOFTMAX_H
 
 #include <Eigen/Dense>
+#include "../ModelWrappers/Layer.h"
+#include "../ModelWrappers/Activation.h"
 
-class Softmax {
+class Softmax : public Layer, public Activation {
 
     public:
         Softmax();
-        Eigen::MatrixXd* getOutput() const;
-        Eigen::MatrixXd* getDinputs() const;
-        void forward(Eigen::MatrixXd* input);
-        void backward(Eigen::MatrixXd* dvalues);
+        std::string getName() const override;
+        
+        void forward(Eigen::MatrixXd* input) override;
+        Eigen::MatrixXd* getOutput() const override;
+        Eigen::MatrixXd getPredictions() const override;
+        
+        void backward(Eigen::MatrixXd* dvalues) override;
+        Eigen::MatrixXd* getDinputs() const override;
         
     private:
         Eigen::MatrixXd* output;

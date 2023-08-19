@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include "../ActivationFunctions/Softmax.h"
-#include "CategoricalCrossEntropy.h"
+#include "../LossFunctions/CategoricalCrossEntropy.h"
 
 class SoftmaxCategoricalCrossEntropy {
     

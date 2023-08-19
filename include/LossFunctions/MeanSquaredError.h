@@ -2,7 +2,7 @@
 #define MEANSQUAREDERROR_H
 
 #include <Eigen/Dense>
-#include "Loss.h"
+#include "../ModelWrappers/Loss.h"
 
 class MeanSquaredError : public Loss {
 
