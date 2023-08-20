@@ -5,7 +5,7 @@
 #include "../ModelWrappers/Layer.h"
 #include "../ModelWrappers/Activation.h"
 
-class ReLu : public Layer, public Activation {
+class ReLu : public Activation {
 
     public:
         ReLu();

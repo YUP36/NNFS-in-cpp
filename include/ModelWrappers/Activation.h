@@ -1,9 +1,11 @@
 #ifndef ACTIVATION_H
-#define ACTIVAITON_H
+#define ACTIVATION_H
 
 #include <Eigen/Dense>
 
-class Activation {
+#include "Layer.h"
+
+class Activation : public Layer {
     
     public:
         Activation();

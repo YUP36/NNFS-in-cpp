@@ -5,7 +5,7 @@
 #include "../ModelWrappers/Layer.h"
 #include "../ModelWrappers/Activation.h"
 
-class Linear : public Layer, public Activation {
+class Linear : public Activation {
 
     public:
         Linear();

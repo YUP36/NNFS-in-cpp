@@ -5,7 +5,7 @@
 #include "../ModelWrappers/Layer.h"
 #include "../ModelWrappers/Activation.h"
 
-class Sigmoid : public Layer, public Activation {
+class Sigmoid : public Activation {
 
     public: 
         Sigmoid();

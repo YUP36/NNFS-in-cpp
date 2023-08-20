@@ -5,7 +5,7 @@
 #include "../ModelWrappers/Layer.h"
 #include "../ModelWrappers/Activation.h"
 
-class Softmax : public Layer, public Activation {
+class Softmax : public Activation {
 
     public:
         Softmax();

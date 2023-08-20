@@ -24,11 +24,14 @@
 #include "../include/Optimizers/RMSProp.h"
 #include "../include/Optimizers/Adam.h"
 
+#include "../include/AccuracyCalculations/RegressionAccuracy.h"
+
 #include "../include/ModelWrappers/SoftmaxCategoricalCrossEntropy.h"
 #include "../include/ModelWrappers/Model.h"
 #include "../include/ModelWrappers/Layer.h"
 #include "../include/ModelWrappers/Optimizer.h"
 #include "../include/ModelWrappers/Loss.h"
+#include "../include/ModelWrappers/Accuracy.h"
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -50,104 +53,54 @@ int main() {
     MatrixXd X = dataset.getX();
     MatrixXd Y = dataset.getY();
 
-    Dense dense1 = Dense(1, 64);
-    ReLu activation1 = ReLu();
-    Dense dense2 = Dense(64, 64);
-    ReLu activation2 = ReLu();
-    Dense dense3 = Dense(64, 1);
-    Linear activation3 = Linear();
-    MeanSquaredError lossFunction = MeanSquaredError();
+    Layer* layer1 = new Dense(1, 64);
+    Layer* activation1 = new ReLu();
+    Layer* layer2 = new Dense(64, 1);
+    Layer* activation2 = new Linear();
 
-    Adam optimizer = Adam(0.003, 1e-3);
+    Loss* loss = new MeanSquaredError();
+    Optimizer* optimizer = new Adam(0.003, 1e-3);
+    Accuracy* accuracy = new RegressionAccuracy();
+
+    Model m = Model();    
+
+    m.add(layer1);
+    m.add(activation1);
+    m.add(layer2);
+    m.add(activation2);
+    m.set(loss, optimizer, accuracy);
+
+    m.finalize();
+
+    m.train(&X, &Y, 5, 5);
     
-    double standardDeviation = (Y.array() - Y.mean()).square().sum() / Y.rows();
-    double precision = standardDeviation / 250.0;
-    cout << precision << endl;
-    double loss, dataLoss, regularizationLoss;
-    MatrixXd outputs;
-    // VectorXd predictions = VectorXd::Zero(200);
-    int matchCount;
-    // Eigen::Index maxRow;
-    for(int epoch = 0; epoch < 10001; epoch++){
-
-        // auto start = high_resolution_clock::now();
-        // FORWARD PASS
-        dense1.forward(&X);
-        activation1.forward(dense1.getOutput());
-        dense2.forward(activation1.getOutput());
-        activation2.forward(dense2.getOutput());
-        dense3.forward(activation2.getOutput());
-        activation3.forward(dense3.getOutput());
-        lossFunction.forward(activation3.getOutput(), &Y);
-
-        dataLoss = lossFunction.calculate(activation3.getOutput(), &Y);
-        regularizationLoss = lossFunction.calculateRegularizationLoss(&dense1)
-                            + lossFunction.calculateRegularizationLoss(&dense2)
-                            + lossFunction.calculateRegularizationLoss(&dense3);
-        loss = dataLoss + regularizationLoss;
-
-        // ACCURACY CALCULATION
-        outputs = *(activation3.getOutput());
-        MatrixXd difference = (outputs - Y).array().abs();
-        matchCount = difference.unaryExpr([precision](double x){return (x < precision) ? 1.0 : 0.0;}).sum();
-
-        // BACKPROPAGATION
-        lossFunction.backward(activation3.getOutput(), &Y);
-        activation3.backward(lossFunction.getDinputs());
-        dense3.backward(activation3.getDinputs());
-        activation2.backward(dense3.getDinputs());
-        dense2.backward(activation2.getDinputs());
-        activation1.backward(dense2.getDinputs());
-        dense1.backward(activation1.getDinputs());
-
-        // PARAMETER UPDATE
-        optimizer.decay();
-        optimizer.updateParameters(&dense1);
-        optimizer.updateParameters(&dense2);
-        optimizer.updateParameters(&dense3);
-        optimizer.incrementIteration();
-
-        // auto stop = high_resolution_clock::now();
-        // auto duration = duration_cast<microseconds>(stop - start);
-
-        if((epoch % 100) == 0) {
-            cout << "Epoch: " << epoch << "\t";
-            cout << "Loss: " << loss << "\t";
-            cout << "Data loss: " << dataLoss << "\t";
-            cout << "Regularization loss: " << regularizationLoss << "\t";
-            cout << "Accuracy: " << (double) matchCount / Y.rows() << endl;
-            // cout << optimizer.getLearningRate() << endl;
-            // std::cout << duration.count() << std::endl;
-        }
-    }
-
     //////////////////////////////////////////////////////////////////////
     ///////////////////////////// TEST DATA //////////////////////////////
 
-    Spiral test(100, 2);
-    MatrixXd XTest = test.getX();
-    MatrixXd YTest = test.getY();
+    // Spiral test(100, 2);
+    // MatrixXd XTest = test.getX();
+    // MatrixXd YTest = test.getY();
 
-    dense1.forward(&X);
-    activation1.forward(dense1.getOutput());
-    dense2.forward(activation1.getOutput());
-    activation2.forward(dense2.getOutput());
-    dense3.forward(activation2.getOutput());
-    activation3.forward(dense3.getOutput());
-    lossFunction.forward(activation3.getOutput(), &Y);
+    // dense1.forward(&X);
+    // activation1.forward(dense1.getOutput());
+    // dense2.forward(activation1.getOutput());
+    // activation2.forward(dense2.getOutput());
+    // dense3.forward(activation2.getOutput());
+    // activation3.forward(dense3.getOutput());
+    // lossFunction.forward(activation3.getOutput(), &Y);
     
-    dataLoss = lossFunction.calculate(activation3.getOutput(), &Y);
-    regularizationLoss = lossFunction.calculateRegularizationLoss(&dense1)
-                        + lossFunction.calculateRegularizationLoss(&dense2)
-                        + lossFunction.calculateRegularizationLoss(&dense3);
-    loss = dataLoss + regularizationLoss;
+    // dataLoss = lossFunction.calculate(activation3.getOutput(), &Y);
+    // regularizationLoss = lossFunction.calculateRegularizationLoss(&dense1)
+    //                     + lossFunction.calculateRegularizationLoss(&dense2)
+    //                     + lossFunction.calculateRegularizationLoss(&dense3);
+    // loss = dataLoss + regularizationLoss;
 
-    outputs = *(activation3.getOutput());
-    MatrixXd difference = (outputs - Y).array().abs();
-    matchCount = difference.unaryExpr([precision](double x){return (x < precision) ? 1.0 : 0.0;}).sum();
+    // outputs = *(activation3.getOutput());
+    // MatrixXd difference = (outputs - Y).array().abs();
+    // matchCount = difference.unaryExpr([precision](double x){return (x < precision) ? 1.0 : 0.0;}).sum();
     
-    cout << "Test Data: \t Loss: " << loss << "\t";
-    cout << "Accuracy: " << (double) matchCount / Y.rows() << endl;
+    // cout << "Test Data: \t Loss: " << loss << "\t";
+    // cout << "Accuracy: " << (double) matchCount / Y.rows() << endl;
     // cout << optimizer.getLearningRate() << endl;
     
     //////////////////////////////////////////////////////////////////////////
