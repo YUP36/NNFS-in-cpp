@@ -33,6 +33,15 @@ void Dropout::forward(MatrixXd* in) {
     *output = in->array() * mask->array();
 }
 
+void Dropout::forward(MatrixXd* in, bool training) {
+    if(training) {
+        forward(in);
+    } else {
+        if(!output) output = new MatrixXd(in->rows(), in->cols());
+        *output = *in;
+    }
+}
+
 MatrixXd* Dropout::getOutput() const {
     return output;
 }

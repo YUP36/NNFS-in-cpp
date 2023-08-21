@@ -5,7 +5,7 @@ using Eigen::MatrixXd;
 Layer::Layer() {}
 
 std::string Layer::getName() const {
-    return "layer";
+    return "Layer";
 }
 
 void Layer::forward(MatrixXd* in) {

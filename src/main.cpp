@@ -25,6 +25,7 @@
 #include "../include/Optimizers/Adam.h"
 
 #include "../include/AccuracyCalculations/RegressionAccuracy.h"
+#include "../include/AccuracyCalculations/CategoricalAccuracy.h"
 
 #include "../include/ModelWrappers/SoftmaxCategoricalCrossEntropy.h"
 #include "../include/ModelWrappers/Model.h"
@@ -35,9 +36,6 @@
 
 using namespace std;
 using Eigen::MatrixXd;
-using Eigen::VectorXd;
-using Eigen::VectorXi;
-using Eigen::RowVectorXd;
 using namespace std::chrono;
 
 // auto start = high_resolution_clock::now();
@@ -49,59 +47,57 @@ using namespace std::chrono;
 int main() {
     srand(1);
 
-    Sine dataset = Sine();
+    // Sine dataset = Sine();
+    Spiral dataset = Spiral(100, 2);
     MatrixXd X = dataset.getX();
     MatrixXd Y = dataset.getY();
 
-    Layer* layer1 = new Dense(1, 64);
-    Layer* activation1 = new ReLu();
-    Layer* layer2 = new Dense(64, 1);
-    Layer* activation2 = new Linear();
+    // Sine validationData = Sine();
+    Spiral validationData = Spiral(100, 2);
+    MatrixXd XValidation = validationData.getX();
+    MatrixXd YValidation = validationData.getY();
 
-    Loss* loss = new MeanSquaredError();
-    Optimizer* optimizer = new Adam(0.003, 1e-3);
-    Accuracy* accuracy = new RegressionAccuracy();
+    // Layer* layer1 = new Dense(1, 64);
+    // Layer* activation1 = new ReLu();
+    // Layer* layer2 = new Dense(64, 64);
+    // Layer* activation2 = new ReLu();
+    // Layer* layer3 = new Dense(64, 1);
+    // Layer* activation3 = new Linear();
+
+    // Layer* layer1 = new Dense(2, 64, 5e-4, 5e-4);
+    // Layer* activation1 = new ReLu();
+    // Layer* layer2 = new Dense(64, 1);
+    // Layer* activation2 = new Sigmoid();
+
+    Layer* layer1 = new Dense(2, 64, 0.0, 0.0, 5e-4, 5e-4);
+    Layer* activation1 = new ReLu();
+    // Layer* dropout = new Dropout(0.1);
+    Layer* layer2 = new Dense(64, 5);
+    Layer* activation2 = new Softmax();
+    
+    // Loss* loss = new MeanSquaredError();
+    // Loss* loss = new BinaryCrossEntropy();
+    Loss* loss = new CategoricalCrossEntropy();
+    
+    Optimizer* optimizer = new Adam(0.001, 5e-5);
+    
+    // Accuracy* accuracy = new RegressionAccuracy();
+    Accuracy* accuracy = new CategoricalAccuracy();
 
     Model m = Model();    
 
     m.add(layer1);
     m.add(activation1);
+    // m.add(dropout);
     m.add(layer2);
     m.add(activation2);
+    // m.add(layer3);
+    // m.add(activation3);
     m.set(loss, optimizer, accuracy);
 
     m.finalize();
 
-    m.train(&X, &Y, 5, 5);
-    
-    //////////////////////////////////////////////////////////////////////
-    ///////////////////////////// TEST DATA //////////////////////////////
-
-    // Spiral test(100, 2);
-    // MatrixXd XTest = test.getX();
-    // MatrixXd YTest = test.getY();
-
-    // dense1.forward(&X);
-    // activation1.forward(dense1.getOutput());
-    // dense2.forward(activation1.getOutput());
-    // activation2.forward(dense2.getOutput());
-    // dense3.forward(activation2.getOutput());
-    // activation3.forward(dense3.getOutput());
-    // lossFunction.forward(activation3.getOutput(), &Y);
-    
-    // dataLoss = lossFunction.calculate(activation3.getOutput(), &Y);
-    // regularizationLoss = lossFunction.calculateRegularizationLoss(&dense1)
-    //                     + lossFunction.calculateRegularizationLoss(&dense2)
-    //                     + lossFunction.calculateRegularizationLoss(&dense3);
-    // loss = dataLoss + regularizationLoss;
-
-    // outputs = *(activation3.getOutput());
-    // MatrixXd difference = (outputs - Y).array().abs();
-    // matchCount = difference.unaryExpr([precision](double x){return (x < precision) ? 1.0 : 0.0;}).sum();
-    
-    // cout << "Test Data: \t Loss: " << loss << "\t";
-    // cout << "Accuracy: " << (double) matchCount / Y.rows() << endl;
-    // cout << optimizer.getLearningRate() << endl;
+    m.train(&X, &Y, 10000, 100, &XValidation, &YValidation);
     
     //////////////////////////////////////////////////////////////////////////
     ///////////////////////////// VISUALIZATION //////////////////////////////

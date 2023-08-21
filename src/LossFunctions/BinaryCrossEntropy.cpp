@@ -3,17 +3,25 @@
 using Eigen::MatrixXd;
 using Eigen::ArrayXd;
 using Eigen::VectorXd;
-using Eigen::VectorXi;
 
 BinaryCrossEntropy::BinaryCrossEntropy() {
+    output = nullptr;
     dinputs = nullptr;
 }
 
-VectorXd BinaryCrossEntropy::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
+std::string BinaryCrossEntropy::getName() const {
+    return "BinaryCrossEntropy";
+}
+
+void BinaryCrossEntropy::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
+    if(!output) output = new VectorXd(yTrue->rows());
     ArrayXd yClipped = yPredicted->unaryExpr([](double x){return std::max(std::min(x, 1-1e-7), 1e-7);});
-    // Pretty sure the next line should have a minus    \/
-    MatrixXd losses = -(yTrue->array() * yClipped.log()) - (1 - yTrue->array()) * (1 - yClipped).log();
-    return losses.rowwise().mean();
+    *output = -(yTrue->array() * yClipped.log()) - (1 - yTrue->array()) * (1 - yClipped).log();
+    *output = output->rowwise().mean();
+}
+
+VectorXd* BinaryCrossEntropy::getOutput() {
+    return output;
 }
 
 void BinaryCrossEntropy::backward(MatrixXd* yPredicted, MatrixXd* yTrue) {

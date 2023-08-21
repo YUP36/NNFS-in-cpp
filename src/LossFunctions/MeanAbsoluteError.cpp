@@ -4,12 +4,22 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 MeanAbsoluteError::MeanAbsoluteError() {
+    output = nullptr;
     dinputs = nullptr;
 }
 
-VectorXd MeanAbsoluteError::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
-    MatrixXd squaredError = (*yTrue - *yPredicted).array().abs();
-    return squaredError.rowwise().mean();
+std::string MeanAbsoluteError::getName() const {
+    return "MeanAbsoluteError";
+}
+
+void MeanAbsoluteError::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
+    if(!output) output = new VectorXd(yTrue->rows());
+    *output = (*yTrue - *yPredicted).array().abs();
+    *output = output->rowwise().mean();
+}
+
+VectorXd* MeanAbsoluteError::getOutput() {
+    return output;
 }
 
 void MeanAbsoluteError::backward(MatrixXd* yPredicted, MatrixXd* yTrue) {

@@ -1,13 +1,15 @@
 #ifndef LAYER_H
 #define LAYER_H
 
+#include "../ModelWrappers/NamedWrapper.h"
+
 #include <Eigen/Dense>
 
-class Layer {
+class Layer : public NamedWrapper {
 
     public:
         Layer();
-        virtual std::string getName() const;
+        std::string getName() const override;
 
         virtual void forward(Eigen::MatrixXd* in);
         virtual Eigen::MatrixXd* getOutput() const;

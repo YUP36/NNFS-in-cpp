@@ -5,12 +5,29 @@ using Eigen::VectorXd;
 
 Loss::Loss() {}
 
-double Loss::calculate(MatrixXd* yPredicted, MatrixXd* yTrue) {
-    return forward(yPredicted, yTrue).mean();
+std::string Loss::getName() const {
+    return "Loss";
 }
 
-VectorXd Loss::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
-    return VectorXd::Zero(yPredicted->rows());
+double Loss::calculate(MatrixXd* yPredicted, MatrixXd* yTrue) {
+    forward(yPredicted, yTrue);
+    return (*getOutput()).mean();
+}
+
+void Loss::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
+    return;
+}
+
+VectorXd* Loss::getOutput() {
+    return new VectorXd();
+}
+
+void Loss::backward(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue) {
+    return;
+}
+
+Eigen::MatrixXd* Loss::getDinputs() const {
+    return new MatrixXd();
 }
 
 double Loss::calculateRegularizationLoss(Dense* layer) {

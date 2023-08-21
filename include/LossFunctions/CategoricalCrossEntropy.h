@@ -8,11 +8,16 @@ class CategoricalCrossEntropy : public Loss {
 
     public:
         CategoricalCrossEntropy();
-        Eigen::VectorXd forward(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue) override;
-        void backward(Eigen::MatrixXd* yPredicted, Eigen::VectorXi* yTrue);
-        Eigen::MatrixXd* getDinputs() const;
+        std::string getName() const override;
+
+        void forward(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue) override;
+        virtual Eigen::VectorXd* getOutput() override;
+        
+        void backward(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue) override;
+        Eigen::MatrixXd* getDinputs() const override;
 
     private:
+        Eigen::VectorXd* output;
         Eigen::MatrixXd* dinputs;
 };
 

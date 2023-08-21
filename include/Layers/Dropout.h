@@ -12,6 +12,7 @@ class Dropout : public Layer {
         std::string getName() const override;
 
         void forward(Eigen::MatrixXd* in) override;
+        void forward(Eigen::MatrixXd* in, bool training);
         Eigen::MatrixXd* getOutput() const override;
 
         void backward(Eigen::MatrixXd* dvalues) override;

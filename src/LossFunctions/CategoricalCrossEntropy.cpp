@@ -6,26 +6,39 @@ using Eigen::VectorXd;
 using Eigen::placeholders::all;
 
 CategoricalCrossEntropy::CategoricalCrossEntropy() {
+    output = nullptr;
     dinputs = nullptr;
 }
 
-VectorXd CategoricalCrossEntropy::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
-    int numSamples = yTrue->rows();
-    VectorXd output = VectorXd::Zero(numSamples);
-    MatrixXd yClipped = yPredicted->unaryExpr([](double x){return std::max(std::min(x, 1-1e-7), 1e-7);});
-    
-    for(int rowIndex = 0; rowIndex < numSamples; rowIndex++) {
-        output(rowIndex) = yClipped(rowIndex, (int) ((*yTrue)(rowIndex, 0)));
-    }
-
-    return (-1 * output.array().log());
+std::string CategoricalCrossEntropy::getName() const {
+    return "CategoricalCrossEntropy";
 }
 
-void CategoricalCrossEntropy::backward(MatrixXd* yPredicted, VectorXi* yTrue) {
+void CategoricalCrossEntropy::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
+    int numSamples = yTrue->rows();
+    if(!output) output = new VectorXd(numSamples);
+
+    MatrixXd yClipped = yPredicted->unaryExpr([](double x){return std::max(std::min(x, 1-1e-7), 1e-7);});
+    for(int row = 0; row < numSamples; row++) {
+        (*output)(row) = yClipped(row, (int) ((*yTrue)(row, 0)));
+    }
+
+    *output = -1 * output->array().log();
+}
+
+VectorXd* CategoricalCrossEntropy::getOutput() {
+    return output;
+}
+
+void CategoricalCrossEntropy::backward(MatrixXd* yPredicted, MatrixXd* yTrue) {
     int numSamples = yPredicted->rows();
     int numLabels = yPredicted->cols();
+
     MatrixXd identity = MatrixXd::Identity(numLabels, numLabels);
-    MatrixXd oneHotYTrue = identity(*yTrue, all);
+    MatrixXd oneHotYTrue = MatrixXd(numSamples, numLabels);
+    for(int row = 0; row < numSamples; row++) {
+        oneHotYTrue.row(row) = identity.row((int) ((*yTrue)(row, 0)));
+    }
     
     if(!dinputs) dinputs = new MatrixXd(numSamples, numLabels);
     *dinputs = (oneHotYTrue.array() / yPredicted->array()) / (-numSamples);
