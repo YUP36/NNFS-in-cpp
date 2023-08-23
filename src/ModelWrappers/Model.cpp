@@ -5,6 +5,7 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using Eigen::RowVectorXd;
 using namespace std;
 
 Model::Model() {
@@ -36,7 +37,7 @@ void Model::finalize() {
 
 void Model::train(MatrixXd* X, MatrixXd* Y, int epochs, int printEvery, int batchSize, MatrixXd* XValidation, MatrixXd* YValidation) {
     accuracy->initialize(Y);
-    
+
     int numSamples = X->rows();
     int numTrainingSteps;
     if(batchSize == 0) {
@@ -50,10 +51,10 @@ void Model::train(MatrixXd* X, MatrixXd* Y, int epochs, int printEvery, int batc
 
         loss->newPass();
         accuracy->newPass();
-        cout << "Epoch: " << epoch << endl;
-
         double dataLoss, regularizationLoss, totalLoss;
+        cout << "Epoch: " << epoch << endl;
         for(int step = 0; step < numTrainingSteps; step++) {
+
             // SLICE BATCH
             int actualBatchSize = (step < numTrainingSteps - 1) ? batchSize : numSamples - (step * batchSize);
             MatrixXd XBatch = X->middleRows(step * batchSize, actualBatchSize);
@@ -104,40 +105,91 @@ void Model::train(MatrixXd* X, MatrixXd* Y, int epochs, int printEvery, int batc
     }
 
     // VALIDATION
-    if(YValidation && XValidation) {
-        loss->newPass();
-        accuracy->newPass();
+    if(XValidation && YValidation) {
+        evaluate(XValidation, YValidation, batchSize);
+    }
+}
 
-        int numSamples = XValidation->rows();
-        int numTrainingSteps;
-        if(batchSize == 0) {
-            numTrainingSteps = 1;
-            batchSize = numSamples;
-        } else {
-            numTrainingSteps = (numSamples / batchSize) + ((numSamples % batchSize) > 0);
-        }
+void Model::evaluate(MatrixXd* XValidation, MatrixXd* YValidation, int batchSize) {
+    loss->newPass();
+    accuracy->newPass();
 
-        for(int step = 0; step < numTrainingSteps; step++) {
-            // SLICE BATCH
-            int actualBatchSize = (step < numTrainingSteps - 1) ? batchSize : numSamples - (step * batchSize);
-            MatrixXd XBatch = X->middleRows(step * batchSize, actualBatchSize);
-            MatrixXd YBatch = Y->middleRows(step * batchSize, actualBatchSize);
+    int numSamples = XValidation->rows();
+    int numTrainingSteps;
+    if(batchSize == 0) {
+        numTrainingSteps = 1;
+        batchSize = numSamples;
+    } else {
+        numTrainingSteps = (numSamples / batchSize) + ((numSamples % batchSize) > 0);
+    }
 
-            // FORWARD PASS
-            MatrixXd output = forward(&XBatch, false);
+    for(int step = 0; step < numTrainingSteps; step++) {
 
-            // LOSS CALCULATION
-            loss->calculate(&output, &YBatch);
+        // SLICE BATCH
+        int actualBatchSize = (step < numTrainingSteps - 1) ? batchSize : numSamples - (step * batchSize);
+        MatrixXd XBatch = XValidation->middleRows(step * batchSize, actualBatchSize);
+        MatrixXd YBatch = YValidation->middleRows(step * batchSize, actualBatchSize);
 
-            // ACCURACY CALCULATION
-            MatrixXd predictions = outputLayer->getPredictions();
-            accuracy->calculateAccuracy(&predictions, &YBatch);
-        }
+        // FORWARD PASS
+        MatrixXd output = forward(&XBatch, false);
 
-        // PRINT VALIDATION RESULTS
-        cout << "VALIDATION\t";
-        cout << "Loss: " << loss->getAverageDataLoss() << "\t";
-        cout << "Accuracy: " << accuracy->getAverageAccuracy() << endl;
+        // LOSS CALCULATION
+        loss->calculate(&output, &YBatch);
+
+        // ACCURACY CALCULATION
+        MatrixXd predictions = outputLayer->getPredictions();
+        accuracy->calculateAccuracy(&predictions, &YBatch);
+    }
+
+    // PRINT VALIDATION RESULTS
+    cout << "VALIDATION\t";
+    cout << "Loss: " << loss->getAverageDataLoss() << "\t";
+    cout << "Accuracy: " << accuracy->getAverageAccuracy() << endl;
+}
+
+MatrixXd Model::predict(MatrixXd* X, int numLabels, int batchSize) {
+    int numSamples = X->rows();
+    int numTrainingSteps;
+    if(batchSize == 0) {
+        numTrainingSteps = 1;
+        batchSize = numSamples;
+    } else {
+        numTrainingSteps = (numSamples / batchSize) + ((numSamples % batchSize) > 0);
+    }
+
+    MatrixXd finalOutput = MatrixXd(numSamples, numLabels);
+    for(int step = 0; step < numTrainingSteps; step++) {
+
+        // SLICE BATCH
+        int actualBatchSize = (step < numTrainingSteps - 1) ? batchSize : numSamples - (step * batchSize);
+        MatrixXd XBatch = X->middleRows(step * batchSize, actualBatchSize);
+
+        // FORWARD PASS
+        finalOutput.middleRows(step * batchSize, actualBatchSize) = forward(&XBatch, false);
+    }
+    return finalOutput;
+}
+
+vector<MatrixXd> Model::getWeights() {
+    vector<MatrixXd> weights;
+    for(int i = 0; i < trainableLayers.size(); i++) {
+        weights.push_back(*(trainableLayers[i]->getWeights()));
+    }
+    return weights;
+}
+
+vector<RowVectorXd> Model::getBiases() {
+    vector<RowVectorXd> biases;
+    for(int i = 0; i < trainableLayers.size(); i++) {
+        biases.push_back(*(trainableLayers[i]->getBiases()));
+    }
+    return biases;
+}
+
+void Model::setParameters(vector<MatrixXd> weights, vector<RowVectorXd> biases) {
+    for(int i = 0; i < trainableLayers.size(); i++) {
+        trainableLayers[i]->setWeights(&weights[i]);
+        trainableLayers[i]->setBiases(&biases[i]);
     }
 }
 

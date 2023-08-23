@@ -16,7 +16,7 @@ OBJ := $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
 CXX := g++
 CXXVERSION := -std=c++17
 CXXFLAGS := -Wall -Ofast -march=native
-INCLUDES := -I /usr/local/include/*
+INCLUDES := -I /usr/local/include/eigen/ -I /usr/local/include/boost_1_82_0/
 
 .PHONY: all clean
 

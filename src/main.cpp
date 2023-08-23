@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <random>
-// #include <algorithm>
 
 #include "../include/DataGeneration/lodepng.h"
 #include "../include/DataGeneration/ImageGenerator.h"
@@ -39,6 +38,7 @@
 
 using namespace std;
 using Eigen::MatrixXd;
+using Eigen::RowVectorXd;
 using namespace std::chrono;
 
 // auto start = high_resolution_clock::now();
@@ -72,7 +72,7 @@ int main() {
     YTrain = YTrain(keys, Eigen::placeholders::all);
 
     XTrain = (XTrain.array() - 127.5) / 127.5;
-    XValidation = (XTrain.array() - 127.5) / 127.5;
+    XValidation = (XValidation.array() - 127.5) / 127.5;
 
     Layer* layer1 = new Dense(XTrain.cols(), 64);
     Layer* activation1 = new ReLu();
@@ -97,60 +97,41 @@ int main() {
 
     m.finalize();
 
-    m.train(&XTrain, &YTrain, 5, 100, 128, &XValidation, &YValidation);
+    m.train(&XTrain, &YTrain, 10, 100, 128, &XValidation, &YValidation);
+    m.evaluate(&XValidation, &YValidation, 128);
+
+    MatrixXd slice = XValidation.middleRows(0, 5);
+    cout << m.predict(&slice, 10, 0) << endl;
     
+    // vector<MatrixXd> weights = m.getWeights();
+    // vector<RowVectorXd> biases = m.getBiases();
+
+    // // NEW MODEL!
+    // Layer* m2layer1 = new Dense(XTrain.cols(), 64);
+    // Layer* m2activation1 = new ReLu();
+    // Layer* m2layer2 = new Dense(64, 64);
+    // Layer* m2activation2 = new ReLu();
+    // Layer* m2layer3 = new Dense(64, 10);
+    // Layer* m2activation3 = new Softmax();
     
-    // // Sine dataset = Sine();
-    // Spiral dataset = Spiral(100, 2);
-    // MatrixXd X = dataset.getX();
-    // MatrixXd Y = dataset.getY();
+    // Loss* m2loss = new CategoricalCrossEntropy();
+    // Optimizer* m2optimizer = new Adam(0.001, 5e-5);
+    // Accuracy* m2accuracy = new CategoricalAccuracy();
 
-    // // Sine validationData = Sine();
-    // Spiral validationData = Spiral(100, 2);
-    // MatrixXd XValidation = validationData.getX();
-    // MatrixXd YValidation = validationData.getY();
+    // Model m2 = Model();    
 
-    // // Layer* layer1 = new Dense(1, 64);
-    // // Layer* activation1 = new ReLu();
-    // // Layer* layer2 = new Dense(64, 64);
-    // // Layer* activation2 = new ReLu();
-    // // Layer* layer3 = new Dense(64, 1);
-    // // Layer* activation3 = new Linear();
+    // m2.add(m2layer1);
+    // m2.add(m2activation1);
+    // m2.add(m2layer2);
+    // m2.add(m2activation2);
+    // m2.add(m2layer3);
+    // m2.add(m2activation3);
+    // m2.set(m2loss, m2optimizer, m2accuracy);
 
-    // // Layer* layer1 = new Dense(2, 64, 5e-4, 5e-4);
-    // // Layer* activation1 = new ReLu();
-    // // Layer* layer2 = new Dense(64, 1);
-    // // Layer* activation2 = new Sigmoid();
+    // m2.finalize();
 
-    // Layer* layer1 = new Dense(2, 64, 0.0, 0.0, 5e-4, 5e-4);
-    // Layer* activation1 = new ReLu();
-    // // Layer* dropout = new Dropout(0.1);
-    // Layer* layer2 = new Dense(64, 5);
-    // Layer* activation2 = new Softmax();
-    
-    // // Loss* loss = new MeanSquaredError();
-    // // Loss* loss = new BinaryCrossEntropy();
-    // Loss* loss = new CategoricalCrossEntropy();
-    
-    // Optimizer* optimizer = new Adam(0.001, 5e-5);
-    
-    // // Accuracy* accuracy = new RegressionAccuracy();
-    // Accuracy* accuracy = new CategoricalAccuracy();
-
-    // Model m = Model();    
-
-    // m.add(layer1);
-    // m.add(activation1);
-    // // m.add(dropout);
-    // m.add(layer2);
-    // m.add(activation2);
-    // // m.add(layer3);
-    // // m.add(activation3);
-    // m.set(loss, optimizer, accuracy);
-
-    // m.finalize();
-
-    // m.train(&X, &Y, 10000, 100, &XValidation, &YValidation);
+    // m2.setParameters(weights, biases);
+    // m2.evaluate(&XValidation, &YValidation, 128);
 
     return 0;
 }
