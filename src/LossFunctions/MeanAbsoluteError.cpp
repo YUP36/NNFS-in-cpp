@@ -13,7 +13,7 @@ std::string MeanAbsoluteError::getName() const {
 }
 
 void MeanAbsoluteError::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
-    if(!output) output = new VectorXd(yTrue->rows());
+    if(!output || (yTrue->rows() != output->rows())) output = new VectorXd(yTrue->rows());
     *output = (*yTrue - *yPredicted).array().abs();
     *output = output->rowwise().mean();
 }
@@ -26,7 +26,7 @@ void MeanAbsoluteError::backward(MatrixXd* yPredicted, MatrixXd* yTrue) {
     int numSamples = yPredicted->rows();
     int numOutputs = yPredicted->cols();
 
-    if(!dinputs) dinputs = new MatrixXd(numSamples, numOutputs);
+    if(!dinputs || (numSamples != dinputs->rows())) dinputs = new MatrixXd(numSamples, numOutputs);
     MatrixXd difference = *yTrue - *yPredicted;
     *dinputs = difference.unaryExpr([](double x){return (x < 0) ? 1.0 : -1.0;}) / (numSamples * numOutputs);
 }

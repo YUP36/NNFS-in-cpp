@@ -13,7 +13,7 @@ std::string MeanSquaredError::getName() const {
 }
 
 void MeanSquaredError::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
-    if(!output) output = new VectorXd(yTrue->rows());
+    if(!output || (yTrue->rows() != output->rows())) output = new VectorXd(yTrue->rows());
     *output = (*yTrue - *yPredicted).array().square();
     *output = output->rowwise().mean();
 }
@@ -26,7 +26,7 @@ void MeanSquaredError::backward(MatrixXd* yPredicted, MatrixXd* yTrue) {
     int numSamples = yPredicted->rows();
     int numOutputs = yPredicted->cols();
 
-    if(!dinputs) dinputs = new MatrixXd(numSamples, numOutputs);
+    if(!dinputs || (numSamples != dinputs->rows())) dinputs = new MatrixXd(numSamples, numOutputs);
     *dinputs = -2 * (*yTrue - *yPredicted) / (numSamples * numOutputs);
 }
 

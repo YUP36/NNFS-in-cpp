@@ -4,6 +4,10 @@ Optimizer::Optimizer() {
     return;
 }
 
+double Optimizer::getLearningRate() {
+    return 0.0;
+}
+
 void Optimizer::decay() {
     return;
 }

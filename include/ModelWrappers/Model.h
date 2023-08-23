@@ -19,7 +19,7 @@ class Model {
         void add(Layer* layerPointer);
         void set(Loss* loss, Optimizer* optimizer, Accuracy* acc);
         void finalize();
-        void train(Eigen::MatrixXd* X, Eigen::MatrixXd* Y, int epochs, int printEvery, Eigen::MatrixXd* XValidation = nullptr, Eigen::MatrixXd* YValidation = nullptr);
+        void train(Eigen::MatrixXd* X, Eigen::MatrixXd* Y, int epochs, int printEvery, int batchSize = 0, Eigen::MatrixXd* XValidation = nullptr, Eigen::MatrixXd* YValidation = nullptr);
         Eigen::MatrixXd forward(Eigen::MatrixXd* in, bool training);
         void backward(Eigen::MatrixXd* output, Eigen::MatrixXd* yTrue);
 

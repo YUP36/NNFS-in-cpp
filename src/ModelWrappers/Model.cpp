@@ -35,59 +35,110 @@ void Model::finalize() {
     }
 }
 
-void Model::train(MatrixXd* X, MatrixXd* Y, int epochs, int printEvery, MatrixXd* XValidation, MatrixXd* YValidation) {
+void Model::train(MatrixXd* X, MatrixXd* Y, int epochs, int printEvery, int batchSize, MatrixXd* XValidation, MatrixXd* YValidation) {
     accuracy->initialize(Y);
+    
+    int numSamples = X->rows();
+    int numTrainingSteps;
+    if(batchSize == 0) {
+        numTrainingSteps = 1;
+        batchSize = numSamples;
+    } else {
+        numTrainingSteps = (numSamples / batchSize) + ((numSamples % batchSize) > 0);
+    }
 
     for(int epoch = 0; epoch < epochs; epoch++) {
 
-        // FORWARD PASS
-        MatrixXd output = forward(X, true);
+        loss->newPass();
+        accuracy->newPass();
+        cout << "Epoch: " << epoch << endl;
 
-        // LOSS CALCULATION
-        double dataLoss = loss->calculate(&output, Y);
-        double regularizationLoss = 0;
-        for(int i = 0; i < trainableLayers.size(); i++) {
-            regularizationLoss += loss->calculateRegularizationLoss(trainableLayers[i]);
-        } 
-        double totalLoss = dataLoss + regularizationLoss;
+        double dataLoss, regularizationLoss, totalLoss;
+        for(int step = 0; step < numTrainingSteps; step++) {
+            // SLICE BATCH
+            int actualBatchSize = (step < numTrainingSteps - 1) ? batchSize : numSamples - (step * batchSize);
+            MatrixXd XBatch = X->middleRows(step * batchSize, actualBatchSize);
+            MatrixXd YBatch = Y->middleRows(step * batchSize, actualBatchSize);
 
-        // ACCURACY CALCULATION
-        MatrixXd predictions = outputLayer->getPredictions();
-        double accuracyScore = accuracy->calculateAccuracy(&predictions, Y);
+            // FORWARD PASS
+            MatrixXd output = forward(&XBatch, true);
 
-        // BACKPROPAGATION
-        backward(&output, Y);
+            // LOSS CALCULATION
+            dataLoss = loss->calculate(&output, &YBatch);
+            regularizationLoss = 0;
+            for(int i = 0; i < trainableLayers.size(); i++) {
+                regularizationLoss += loss->calculateRegularizationLoss(trainableLayers[i]);
+            } 
+            totalLoss = dataLoss + regularizationLoss;
 
-        // PARAMETER UPDATE
-        optimizer->decay();
-        for(int i = 0; i < trainableLayers.size(); i++) {
-            optimizer->updateParameters(trainableLayers[i]);
-        } 
-        optimizer->incrementIteration();
+            // ACCURACY CALCULATION
+            MatrixXd predictions = outputLayer->getPredictions();
+            double accuracyScore = accuracy->calculateAccuracy(&predictions, &YBatch);
 
-        // PRINT EPOCH
-        if(epoch % printEvery == 0) {
-            cout << "Epoch: " << epoch << "\t";
-            cout << "Loss: " << totalLoss << "\t";
-            cout << "Data loss: " << dataLoss << "\t";
-            cout << "Regularization loss: " << regularizationLoss << "\t";
-            cout << "Accuracy: " << accuracyScore << endl;
+            // BACKPROPAGATION
+            backward(&output, &YBatch);
+
+            // PARAMETER UPDATE
+            optimizer->decay();
+            for(int i = 0; i < trainableLayers.size(); i++) {
+                optimizer->updateParameters(trainableLayers[i]);
+            } 
+            optimizer->incrementIteration();
+
+            // PRINT STEP
+            if((step % printEvery == 0) || (step == numTrainingSteps - 1)) {
+                cout << "\tStep: " << step << "\t";
+                cout << "Loss: " << totalLoss << "\t";
+                cout << "Data loss: " << dataLoss << "\t";
+                cout << "Regularization loss: " << regularizationLoss << "\t";
+                cout << "Accuracy: " << accuracyScore << "\t";
+                cout << "Learning rate: " << optimizer->getLearningRate() << endl;
+            }
         }
+
+        cout << "Completed epoch " << epoch << "\t";
+        cout << "Loss: " << loss->getAverageDataLoss() + regularizationLoss << "\t";
+        cout << "Data loss: " << loss->getAverageDataLoss() << "\t";
+        cout << "Regularization loss: " << regularizationLoss << "\t";
+        cout << "Accuracy: " << accuracy->getAverageAccuracy() << "\t";
+        cout << "Learning rate: " << optimizer->getLearningRate() << endl << endl;
     }
 
     // VALIDATION
     if(YValidation && XValidation) {
-        // FORWARD PASS
-        MatrixXd output = forward(XValidation, false);
-        // LOSS CALCULATION
-        double totalLoss = loss->calculate(&output, YValidation);
-        // ACCURACY CALCULATION
-        MatrixXd predictions = outputLayer->getPredictions();
-        double accuracyScore = accuracy->calculateAccuracy(&predictions, YValidation);
+        loss->newPass();
+        accuracy->newPass();
+
+        int numSamples = XValidation->rows();
+        int numTrainingSteps;
+        if(batchSize == 0) {
+            numTrainingSteps = 1;
+            batchSize = numSamples;
+        } else {
+            numTrainingSteps = (numSamples / batchSize) + ((numSamples % batchSize) > 0);
+        }
+
+        for(int step = 0; step < numTrainingSteps; step++) {
+            // SLICE BATCH
+            int actualBatchSize = (step < numTrainingSteps - 1) ? batchSize : numSamples - (step * batchSize);
+            MatrixXd XBatch = X->middleRows(step * batchSize, actualBatchSize);
+            MatrixXd YBatch = Y->middleRows(step * batchSize, actualBatchSize);
+
+            // FORWARD PASS
+            MatrixXd output = forward(&XBatch, false);
+
+            // LOSS CALCULATION
+            loss->calculate(&output, &YBatch);
+
+            // ACCURACY CALCULATION
+            MatrixXd predictions = outputLayer->getPredictions();
+            accuracy->calculateAccuracy(&predictions, &YBatch);
+        }
+
         // PRINT VALIDATION RESULTS
-        cout << endl << "VALIDATION\t";
-        cout << "Loss: " << totalLoss << "\t";
-        cout << "Accuracy: " << accuracyScore << endl;
+        cout << "VALIDATION\t";
+        cout << "Loss: " << loss->getAverageDataLoss() << "\t";
+        cout << "Accuracy: " << accuracy->getAverageAccuracy() << endl;
     }
 }
 

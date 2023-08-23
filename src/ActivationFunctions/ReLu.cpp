@@ -13,9 +13,9 @@ std::string ReLu::getName() const {
 }
 
 void ReLu::forward(MatrixXd* in) {
-    if(!input) input = new MatrixXd(in->rows(), in->cols());
+    if(!input || (in->rows() != input->rows())) input = new MatrixXd(in->rows(), in->cols());
     *input = *in;
-    if(!output) output = new MatrixXd(in->rows(), in->cols());
+    if(!output || (in->rows() != output->rows())) output = new MatrixXd(in->rows(), in->cols());
     *output = in->unaryExpr([](double x){return std::max(0.0, x);});
 }
 
@@ -28,7 +28,7 @@ MatrixXd ReLu::getPredictions() const {
 }
 
 void ReLu::backward(MatrixXd* dvalues) {
-    if(!dinputs) dinputs = new MatrixXd(dvalues->rows(), dvalues->cols());
+    if(!dinputs || (dvalues->rows() != dinputs->rows())) dinputs = new MatrixXd(dvalues->rows(), dvalues->cols());
     *dinputs = *dvalues;
     for(int i = 0; i < input->rows(); i++) {
         for(int j = 0; j < input->cols(); j++) {

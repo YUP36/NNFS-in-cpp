@@ -14,7 +14,7 @@ std::string BinaryCrossEntropy::getName() const {
 }
 
 void BinaryCrossEntropy::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
-    if(!output) output = new VectorXd(yTrue->rows());
+    if(!output || (yTrue->rows() != output->rows())) output = new VectorXd(yTrue->rows());
     ArrayXd yClipped = yPredicted->unaryExpr([](double x){return std::max(std::min(x, 1-1e-7), 1e-7);});
     *output = -(yTrue->array() * yClipped.log()) - (1 - yTrue->array()) * (1 - yClipped).log();
     *output = output->rowwise().mean();
@@ -29,7 +29,7 @@ void BinaryCrossEntropy::backward(MatrixXd* yPredicted, MatrixXd* yTrue) {
     int numOutputs = yPredicted->cols();
 
     ArrayXd yClipped = yPredicted->unaryExpr([](double x){return std::max(std::min(x, 1-1e-7), 1e-7);});
-    if(!dinputs) dinputs = new MatrixXd(numSamples, numOutputs);
+    if(!dinputs || (numSamples != dinputs->rows())) dinputs = new MatrixXd(numSamples, numOutputs);
     *dinputs = -((yTrue->array() / yClipped) - ((1 - yTrue->array()) / (1 - yClipped))) / (numOutputs * numSamples);
 }
 

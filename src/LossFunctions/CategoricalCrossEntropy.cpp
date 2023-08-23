@@ -16,7 +16,7 @@ std::string CategoricalCrossEntropy::getName() const {
 
 void CategoricalCrossEntropy::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {
     int numSamples = yTrue->rows();
-    if(!output) output = new VectorXd(numSamples);
+    if(!output || (numSamples != output->rows())) output = new VectorXd(numSamples);
 
     MatrixXd yClipped = yPredicted->unaryExpr([](double x){return std::max(std::min(x, 1-1e-7), 1e-7);});
     for(int row = 0; row < numSamples; row++) {
@@ -40,7 +40,7 @@ void CategoricalCrossEntropy::backward(MatrixXd* yPredicted, MatrixXd* yTrue) {
         oneHotYTrue.row(row) = identity.row((int) ((*yTrue)(row, 0)));
     }
     
-    if(!dinputs) dinputs = new MatrixXd(numSamples, numLabels);
+    if(!dinputs || (numSamples != dinputs->rows())) dinputs = new MatrixXd(numSamples, numLabels);
     *dinputs = (oneHotYTrue.array() / yPredicted->array()) / (-numSamples);
 }
 

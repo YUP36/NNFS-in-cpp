@@ -9,7 +9,7 @@ class RMSProp : public Optimizer{
 
     public:
         RMSProp(double lr = 1.0, double dr = 0.0, double e = 1e-7, double r = 0.9);
-        double getLearningRate();
+        double getLearningRate() override;
         void decay() override;
         void updateParameters(Dense* layer) override;
         void incrementIteration() override;

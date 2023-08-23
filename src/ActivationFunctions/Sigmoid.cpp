@@ -13,7 +13,7 @@ std::string Sigmoid::getName() const {
 }
 
 void Sigmoid::forward(MatrixXd* in) {
-    if(!output) output = new MatrixXd(in->rows(), in->cols());
+    if(!output || (in->rows() != output->rows())) output = new MatrixXd(in->rows(), in->cols());
     *output = 1 / (1 + (-in->array()).exp());
 }
 
@@ -26,7 +26,7 @@ MatrixXd Sigmoid::getPredictions() const {
 }
 
 void Sigmoid::backward(MatrixXd* dvalues) {
-    if(!dinputs) dinputs = new MatrixXd(dvalues->rows(), dvalues->cols());
+    if(!dinputs || (dvalues->rows() != dinputs->rows())) dinputs = new MatrixXd(dvalues->rows(), dvalues->cols());
     *dinputs = dvalues->array() * (1 - output->array()) * output->array();
 }
 

@@ -7,6 +7,7 @@ class Optimizer {
 
     public:
         Optimizer();
+        virtual double getLearningRate();
         virtual void decay();
         virtual void updateParameters(Dense* layer);
         virtual void incrementIteration();

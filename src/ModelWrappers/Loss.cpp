@@ -3,7 +3,9 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
-Loss::Loss() {}
+Loss::Loss() {
+    newPass();
+}
 
 std::string Loss::getName() const {
     return "Loss";
@@ -11,7 +13,22 @@ std::string Loss::getName() const {
 
 double Loss::calculate(MatrixXd* yPredicted, MatrixXd* yTrue) {
     forward(yPredicted, yTrue);
-    return (*getOutput()).mean();
+
+    int numSamples = yPredicted->rows();
+    double summedSampleLosses = (*getOutput()).sum();
+    
+    accumulatedDataLoss += summedSampleLosses;
+    accumulatedCount += numSamples;
+    return summedSampleLosses / numSamples;
+}
+
+double Loss::getAverageDataLoss() {
+    return accumulatedDataLoss / accumulatedCount;
+}
+
+void Loss::newPass() {
+    accumulatedDataLoss = 0;
+    accumulatedCount = 0;
 }
 
 void Loss::forward(MatrixXd* yPredicted, MatrixXd* yTrue) {

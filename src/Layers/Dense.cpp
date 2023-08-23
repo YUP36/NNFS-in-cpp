@@ -70,7 +70,7 @@ void Dense::updateBiases(RowVectorXd* biasesUpdate) {
 
 void Dense::forward(MatrixXd* in) {
     input = in;
-    if(!output) output = new MatrixXd(input->rows(), weights->cols());
+    if(!output || (input->rows() != output->rows())) output = new MatrixXd(input->rows(), weights->cols());
     *output = ((*input) * (*weights)).rowwise() + (*biases);
 }
 
@@ -95,7 +95,7 @@ void Dense::backward(MatrixXd* dvalues) {
         *dbiases += 2 * lambdaL2Bias * *biases;
     }
 
-    if(!dinputs) dinputs = new MatrixXd(dvalues->rows(), weights->rows());
+    if(!dinputs || (dvalues->rows() != dinputs->rows())) dinputs = new MatrixXd(dvalues->rows(), weights->rows());
     *dinputs = (*dvalues) * weights->transpose();
 }
 

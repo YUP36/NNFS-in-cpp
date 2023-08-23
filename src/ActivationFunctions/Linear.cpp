@@ -12,7 +12,7 @@ std::string Linear::getName() const {
 }
 
 void Linear::forward(MatrixXd* in) {
-    if(!output) output = new MatrixXd(in->rows(), in->cols());
+    if(!output || (in->rows() != output->rows())) output = new MatrixXd(in->rows(), in->cols());
     *output = *in;
 }
 
@@ -25,7 +25,7 @@ MatrixXd Linear::getPredictions() const {
 }
 
 void Linear::backward(MatrixXd* dvalues) {
-    if(!dinputs) dinputs = new MatrixXd(dvalues->rows(), dvalues->cols());
+    if(!dinputs || (dvalues->rows() != dinputs->rows())) dinputs = new MatrixXd(dvalues->rows(), dvalues->cols());
     *dinputs = *dvalues;
 }
 

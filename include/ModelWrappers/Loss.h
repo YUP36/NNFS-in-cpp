@@ -13,6 +13,9 @@ class Loss : public NamedWrapper {
         std::string getName() const override;
 
         double calculate(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue);
+        double getAverageDataLoss();
+        void newPass();
+
         virtual void forward(Eigen::MatrixXd* yPredicted, Eigen::MatrixXd* yTrue);
         virtual Eigen::VectorXd* getOutput();
         
@@ -20,6 +23,10 @@ class Loss : public NamedWrapper {
         virtual Eigen::MatrixXd* getDinputs() const;
         
         double calculateRegularizationLoss(Dense* layer);
+    
+    private:
+        double accumulatedDataLoss;
+        int accumulatedCount;
 
 };
 

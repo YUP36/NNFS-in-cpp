@@ -2,10 +2,26 @@
 
 using Eigen::MatrixXd;
 
-Accuracy::Accuracy() {}
+Accuracy::Accuracy() {
+    newPass();
+}
 
 double Accuracy::calculateAccuracy(MatrixXd* predictions, MatrixXd* yTrue) {
-    return compare(predictions, yTrue).mean();
+    int numSamples = predictions->rows();
+    double summedAccuracyScores = compare(predictions, yTrue).sum();
+
+    accumulatedAccuracy += summedAccuracyScores;
+    accumulatedCount += numSamples;
+    return summedAccuracyScores / numSamples;
+}
+
+double Accuracy::getAverageAccuracy() {
+    return accumulatedAccuracy / accumulatedCount;
+}
+
+void Accuracy::newPass() {
+    accumulatedAccuracy = 0;
+    accumulatedCount = 0;
 }
 
 void Accuracy::initialize(MatrixXd* yTrue, bool reinit) {}

@@ -97,7 +97,8 @@
         "specialfunctions": "cpp",
         "splines": "cpp",
         "*.inc": "cpp",
-        "*.expression": "cpp"
+        "*.expression": "cpp",
+        "filesystem": "cpp"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }
