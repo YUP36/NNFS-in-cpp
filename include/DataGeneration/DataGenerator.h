@@ -1,13 +1,13 @@
-#ifndef DATAPREPROCESSOR_H
-#define DATAPREPROCESSOR_H
+#ifndef DATAGENERATOR_H
+#define DATAGENERATOR_H
 
 #include <string>
 #include <Eigen/Dense>
 
-class DataPreprocessor {
+class DataGenerator {
     
     public:
-        DataPreprocessor();
+        DataGenerator();
         void loadMnistDataset(std::string path);
         Eigen::MatrixXd getX();
         Eigen::MatrixXd getY();

@@ -5,7 +5,7 @@
 
 #include "../include/DataGeneration/lodepng.h"
 #include "../include/DataGeneration/ImageGenerator.h"
-#include "../include/DataGeneration/DataPreprocessor.h"
+#include "../include/DataGeneration/DataGenerator.h"
 #include "../include/DataGeneration/Spiral.h"
 #include "../include/DataGeneration/Sine.h"
 
@@ -52,15 +52,15 @@ int main() {
     auto rng = std::default_random_engine {};
 
     string path = "data/FashionMnistImages/";
-    DataPreprocessor helper = DataPreprocessor();
+    DataGenerator data = DataGenerator();
 
-    helper.loadMnistDataset(path + "train/");
-    MatrixXd XTrain = helper.getX();
-    MatrixXd YTrain = helper.getY();
+    data.loadMnistDataset(path + "train/");
+    MatrixXd XTrain = data.getX();
+    MatrixXd YTrain = data.getY();
 
-    helper.loadMnistDataset(path + "test/");
-    MatrixXd XValidation = helper.getX();
-    MatrixXd YValidation = helper.getY();
+    data.loadMnistDataset(path + "test/");
+    MatrixXd XValidation = data.getX();
+    MatrixXd YValidation = data.getY();
 
     vector<int> keys;
     for(int i = 0; i < YTrain.rows(); i++) {

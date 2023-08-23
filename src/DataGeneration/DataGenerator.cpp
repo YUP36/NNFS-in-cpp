@@ -1,4 +1,4 @@
-#include "../../include/DataGeneration/DataPreprocessor.h"
+#include "../../include/DataGeneration/DataGenerator.h"
 
 #include <vector>
 #include <iostream>
@@ -9,9 +9,9 @@ using namespace std;
 using Eigen::MatrixXd;
 using Eigen::RowVectorXd;
 
-DataPreprocessor::DataPreprocessor() {}
+DataGenerator::DataGenerator() {}
 
-void DataPreprocessor::loadMnistDataset(string path) {
+void DataGenerator::loadMnistDataset(string path) {
     ImageGenerator gen = ImageGenerator();
     vector<vector<double>> rawImages;
     vector<double> labels;
@@ -37,10 +37,10 @@ void DataPreprocessor::loadMnistDataset(string path) {
     }
 }
 
-MatrixXd DataPreprocessor::getX() {
+MatrixXd DataGenerator::getX() {
     return X;
 }
 
-MatrixXd DataPreprocessor::getY() {
+MatrixXd DataGenerator::getY() {
     return Y;
 }

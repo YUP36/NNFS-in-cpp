@@ -1,11 +1,10 @@
 #include "../../include/ModelWrappers/Model.h"
 
+#include <iostream>
 #include "../../include/Layers/Dropout.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
-
-#include <iostream>
 using namespace std;
 
 Model::Model() {
