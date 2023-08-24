@@ -99,7 +99,15 @@
         "*.inc": "cpp",
         "*.expression": "cpp",
         "filesystem": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "any": "cpp",
+        "cfenv": "cpp",
+        "codecvt": "cpp",
+        "csignal": "cpp",
+        "coroutine": "cpp",
+        "shared_mutex": "cpp",
+        "strstream": "cpp",
+        "typeindex": "cpp"
     },
     "C_Cpp.default.compilerPath": "/usr/bin/g++"
 }

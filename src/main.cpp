@@ -47,9 +47,23 @@ using namespace std::chrono;
 // auto duration = duration_cast<microseconds>(stop - start);
 // std::cout << duration.count() << std::endl;
 
+void mnistExample();
+void cceExample();
+void bceExample();
+void mseExample();
+
 int main() {
     srand(1);
-    auto rng = std::default_random_engine {};
+
+    // mnistExample();
+    // cceExample();
+    // bceExample();
+    // mseExample();
+        
+    return 0;
+}
+
+void mnistExample() {
 
     string path = "data/FashionMnistImages/";
     DataGenerator data = DataGenerator();
@@ -66,6 +80,7 @@ int main() {
     for(int i = 0; i < YTrain.rows(); i++) {
         keys.push_back(i);
     }
+    auto rng = std::default_random_engine {};
     std::shuffle(keys.begin(), keys.end(), rng);
 
     XTrain = XTrain(keys, Eigen::placeholders::all);
@@ -100,7 +115,7 @@ int main() {
     m.train(&XTrain, &YTrain, 5, 100, 128, &XValidation, &YValidation);
     m.evaluate(&XValidation, &YValidation, 128);
 
-    MatrixXd slice = XValidation.middleRows(0, 5);
+    // MatrixXd slice = XValidation.middleRows(0, 5);
     // cout << m.predict(&slice, 10, 0) << endl;
 
     ImageGenerator gen = ImageGenerator();
@@ -130,39 +145,136 @@ int main() {
 
         cout << m.predict(&sample, 10, 0) << endl;
     }
-        
+}
 
-    // unsigned error = lodepng::encode("data/", pixels, WIDTH, HEIGHT);
+void cceExample() {
+    const int NUMSAMPLES = 100;
+    const int NUMLABELS = 3;
+    const int WIDTH = 1000;
+    const int HEIGHT = 1000;
+    const int EPOCHS = 10000;
+    const int PRINTEVERY = 100;
+    const int BATCHSIZE = 0;
+
+    Spiral dataset = Spiral(NUMSAMPLES, NUMLABELS);
+    MatrixXd X = dataset.getX();
+    MatrixXd Y = dataset.getY();
+
+    Spiral validationData = Spiral(NUMSAMPLES, NUMLABELS);
+    MatrixXd XValidation = validationData.getX();
+    MatrixXd YValidation = validationData.getY();
+
+    Layer* layer1 = new Dense(2, 64, 0.0, 0.0, 5e-4, 5e-4);
+    Layer* activation1 = new ReLu();
+    // Layer* dropout = new Dropout(0.1);
+    Layer* layer2 = new Dense(64, NUMLABELS);
+    Layer* activation2 = new Softmax();
     
-    // vector<MatrixXd> weights = m.getWeights();
-    // vector<RowVectorXd> biases = m.getBiases();
-
-    // // NEW MODEL!
-    // Layer* m2layer1 = new Dense(XTrain.cols(), 64);
-    // Layer* m2activation1 = new ReLu();
-    // Layer* m2layer2 = new Dense(64, 64);
-    // Layer* m2activation2 = new ReLu();
-    // Layer* m2layer3 = new Dense(64, 10);
-    // Layer* m2activation3 = new Softmax();
+    Loss* loss = new CategoricalCrossEntropy();
     
-    // Loss* m2loss = new CategoricalCrossEntropy();
-    // Optimizer* m2optimizer = new Adam(0.001, 5e-5);
-    // Accuracy* m2accuracy = new CategoricalAccuracy();
+    Optimizer* optimizer = new Adam(0.02, 5e-7);
+    
+    Accuracy* accuracy = new CategoricalAccuracy();
 
-    // Model m2 = Model();    
+    Model m = Model();    
 
-    // m2.add(m2layer1);
-    // m2.add(m2activation1);
-    // m2.add(m2layer2);
-    // m2.add(m2activation2);
-    // m2.add(m2layer3);
-    // m2.add(m2activation3);
-    // m2.set(m2loss, m2optimizer, m2accuracy);
+    m.add(layer1);
+    m.add(activation1);
+    // m.add(dropout);
+    m.add(layer2);
+    m.add(activation2);
+    m.set(loss, optimizer, accuracy);
 
-    // m2.finalize();
+    m.finalize();
 
-    // m2.setParameters(weights, biases);
-    // m2.evaluate(&XValidation, &YValidation, 128);
+    m.train(&X, &Y, EPOCHS, PRINTEVERY, BATCHSIZE, &XValidation, &YValidation);
 
-    return 0;
+    ImageGenerator gen = ImageGenerator();
+    gen.visualize2DClassifier(&m, "data/visualizations/examples/ex1.png", NUMLABELS, false, WIDTH, HEIGHT);
+}
+
+void bceExample() {
+    const int NUMSAMPLES = 100;
+    const int NUMLABELS = 1;
+    const int WIDTH = 1000;
+    const int HEIGHT = 1000;
+    const int EPOCHS = 10000;
+    const int PRINTEVERY = 100;
+    const int BATCHSIZE = 0;
+
+    Spiral dataset = Spiral(NUMSAMPLES, 2);
+    MatrixXd X = dataset.getX();
+    MatrixXd Y = dataset.getY();
+
+    Spiral validationData = Spiral(NUMSAMPLES, 2);
+    MatrixXd XValidation = validationData.getX();
+    MatrixXd YValidation = validationData.getY();
+
+    Layer* layer1 = new Dense(2, 64, 5e-4, 5e-4);
+    Layer* activation1 = new ReLu();
+    Layer* layer2 = new Dense(64, 1);
+    Layer* activation2 = new Sigmoid();
+
+    Loss* loss = new BinaryCrossEntropy();
+    
+    Optimizer* optimizer = new Adam(0.001, 5e-5);
+    
+    Accuracy* accuracy = new CategoricalAccuracy();
+
+    Model m = Model();    
+
+    m.add(layer1);
+    m.add(activation1);
+    m.add(layer2);
+    m.add(activation2);
+    m.set(loss, optimizer, accuracy);
+
+    m.finalize();
+
+    m.train(&X, &Y, EPOCHS, PRINTEVERY, BATCHSIZE, &XValidation, &YValidation);
+
+    ImageGenerator gen = ImageGenerator();
+    gen.visualize2DClassifier(&m, "data/visualizations/examples/ex2.png", NUMLABELS, true, WIDTH, HEIGHT);
+}
+
+void mseExample() {
+    const int NUMSAMPLES = 1000;
+    const int EPOCHS = 10000;
+    const int PRINTEVERY = 100;
+    const int BATCHSIZE = 0;
+
+    Sine dataset = Sine(NUMSAMPLES);
+    MatrixXd X = dataset.getX();
+    MatrixXd Y = dataset.getY();
+
+    Sine validationData = Sine(NUMSAMPLES);
+    MatrixXd XValidation = validationData.getX();
+    MatrixXd YValidation = validationData.getY();
+
+    Layer* layer1 = new Dense(1, 64);
+    Layer* activation1 = new ReLu();
+    Layer* layer2 = new Dense(64, 64);
+    Layer* activation2 = new ReLu();
+    Layer* layer3 = new Dense(64, 1);
+    Layer* activation3 = new Linear();
+    
+    Loss* loss = new MeanSquaredError();
+    
+    Optimizer* optimizer = new Adam(0.001, 5e-5);
+    
+    Accuracy* accuracy = new RegressionAccuracy();
+
+    Model m = Model();    
+
+    m.add(layer1);
+    m.add(activation1);
+    m.add(layer2);
+    m.add(activation2);
+    m.add(layer3);
+    m.add(activation3);
+    m.set(loss, optimizer, accuracy);
+
+    m.finalize();
+
+    m.train(&X, &Y, EPOCHS, PRINTEVERY, BATCHSIZE, &XValidation, &YValidation);
 }

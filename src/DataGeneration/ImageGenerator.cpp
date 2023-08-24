@@ -1,7 +1,9 @@
 #include <iostream>
-#include <vector>
+#include <Eigen/Dense>
 #include "../../include/DataGeneration/lodepng.h"
 #include "../../include/DataGeneration/ImageGenerator.h"
+
+using Eigen::MatrixXd;
 
 ImageGenerator::ImageGenerator() {}
 
@@ -23,24 +25,55 @@ std::vector<unsigned char> ImageGenerator::decodeImage(const char* filename) {
     return image;
 }
 
+void ImageGenerator::visualize2DClassifier(Model* model, std::string filePath, int numLabels, bool binary, const int width, const int height) {
+    MatrixXd inputGrid = MatrixXd(width * height, 2);
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
+            inputGrid((y * height) + x, 0) = (x * 2.0 / width) - 1;
+            inputGrid((y * height) + x, 1) = (y * 2.0 / height) - 1;
+        }
+    }
+    MatrixXd output = model->predict(&inputGrid, numLabels, 128);
+    if(binary) {
+        MatrixXd newOutput = MatrixXd(output.rows(), 2);
+        for(int row = 0; row < output.rows(); row++) {
+            newOutput(row, 0) = output(row, 0);
+            newOutput(row, 1) = 1 - output(row, 0);
+        }
+        output = MatrixXd(output.rows(), 2);
+        output = newOutput;
+    }
+    
+    std::vector<int> redColors, greenColors, blueColors;
+    for(int i = 0; i < numLabels; i++) {
+        redColors.push_back(rand() % 256);
+        greenColors.push_back(rand() % 256);
+        blueColors.push_back(rand() % 256);
+    }
 
+    std::vector<unsigned char> pixels(width * height * 4);
+    Eigen::RowVectorXd pix = Eigen::RowVectorXd(1, numLabels);
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            int rowIndex = y * width + x;
+            pix = output.row(rowIndex);
+            pixels[rowIndex * 4 + 0] = weightedSqrtMean(redColors, pix);
+            pixels[rowIndex * 4 + 1] = weightedSqrtMean(greenColors, pix);
+            pixels[rowIndex * 4 + 2] = weightedSqrtMean(blueColors, pix);
+            pixels[rowIndex * 4 + 3] = 255;
+        }
+    }
+    ImageGenerator gen = ImageGenerator();
+    gen.encodeImage(pixels, filePath, width, height);
+}
 
-    //////////////////////////////////////////////////////////////////////////
-    ///////////////////////////// VISUALIZATION //////////////////////////////
-    // const int WIDTH = 1000;
-    // const int HEIGHT = 1000;
-    // MatrixXd inputGrid = MatrixXd(WIDTH * HEIGHT, 2);
-    // for(int y = 0; y < HEIGHT; y++) {
-    //     for(int x = 0; x < WIDTH; x++) {
-    //         inputGrid((y * HEIGHT) + x, 0) = (x * 2.0 / WIDTH) - 1;
-    //         inputGrid((y * HEIGHT) + x, 1) = (y * 2.0 / HEIGHT) - 1;
-    //     }
-    // }
-
-    // dense1.forward(&inputGrid);
-    // activation1.forward(dense1.getOutput());
-    // dense2.forward(activation1.getOutput());
-    // activation2.forward(dense2.getOutput());
+double ImageGenerator::weightedSqrtMean(std::vector<int> colors, Eigen::RowVectorXd confidences) {
+    int sum = 0;
+    for(int i = 0; i < colors.size(); i++) {
+        sum += colors[i] * colors[i] * confidences(0, i);
+    }
+    return sqrt(sum);
+}
 
     // std::vector<unsigned char> pixels(WIDTH * HEIGHT * 4); // RGBA format
     // double pix;
@@ -58,40 +91,3 @@ std::vector<unsigned char> ImageGenerator::decodeImage(const char* filename) {
     // }
     // ImageGenerator gen = ImageGenerator();
     // gen.createImage(pixels, "visualizations/adam/binaryCrossEntropylr0.01dr5e-7.png", WIDTH, HEIGHT);
-
-
-    // //////////////////////////////////////////////////////////////////////////
-    // ///////////////////////////// VISUALIZATION //////////////////////////////
-    // const int WIDTH = 1000;
-    // const int HEIGHT = 1000;
-    // MatrixXd inputGrid = MatrixXd(WIDTH * HEIGHT, 2);
-    // for(int y = 0; y < HEIGHT; y++) {
-    //     for(int x = 0; x < WIDTH; x++) {
-    //         inputGrid((y * HEIGHT) + x, 0) = (x * 2.0 / WIDTH) - 1;
-    //         inputGrid((y * HEIGHT) + x, 1) = (y * 2.0 / HEIGHT) - 1;
-    //     }
-    // }
-
-    // Dense1.forward(&inputGrid);
-    // activation1.forward(Dense1.getOutput());
-    // Dense2.forward(activation1.getOutput());
-    // activationLoss.forward(Dense2.getOutput());
-
-    // std::vector<unsigned char> pixels(WIDTH * HEIGHT * 4); // RGBA format
-    // RowVectorXd pix = RowVectorXd(1, 3);
-    // for (int y = 0; y < HEIGHT; ++y) {
-    //     for (int x = 0; x < WIDTH; ++x) {
-    //         int index = 4 * (y * WIDTH + x);
-    //         pix = activationLoss.getOutput()->row(y * HEIGHT + x);
-    //         // green: 109, 209, 129
-    //         // red: 255, 130, 130
-    //         // blue: 72, 133, 232
-    //         pixels[index + 0] = sqrt(109 * 109 * pix(0) + 255 * 255 * pix(1) + 72 * 72 * pix(2));
-    //         pixels[index + 1] = sqrt(209 * 209 * pix(0) + 130 * 130 * pix(1) + 133 * 133 * pix(2));
-    //         pixels[index + 2] = sqrt(129 * 129 * pix(0) + 130 * 130 * pix(1) + 232 * 232 * pix(2));
-    //         pixels[index + 3] = 255; // Alpha channel (opacity: 255 = fully opaque)
-    //         // pixels[4 * (y * WIDTH + x) + gridPredictions(HEIGHT * y + x, 0)] = 255;
-    //     }
-    // }
-    // ImageGenerator gen = ImageGenerator();
-    // // gen.createImage(pixels, "visualizations/adam/512lr0.02dr1e-5wrdo0.1.png", WIDTH, HEIGHT);
