@@ -97,11 +97,42 @@ int main() {
 
     m.finalize();
 
-    m.train(&XTrain, &YTrain, 10, 100, 128, &XValidation, &YValidation);
+    m.train(&XTrain, &YTrain, 5, 100, 128, &XValidation, &YValidation);
     m.evaluate(&XValidation, &YValidation, 128);
 
     MatrixXd slice = XValidation.middleRows(0, 5);
-    cout << m.predict(&slice, 10, 0) << endl;
+    // cout << m.predict(&slice, 10, 0) << endl;
+
+    ImageGenerator gen = ImageGenerator();
+    vector<string> names = {"pants.png", "tshirt.png"};
+    for(int i = 0; i < names.size(); i++) {
+        vector<unsigned char> rawImage = gen.decodeImage(("data/fashionImages/" + names[i]).c_str());
+        vector<unsigned char> rescaledImage;
+        vector<double> grayScaleImage;
+
+        int dim = (int) sqrt(rawImage.size()) / 2;
+        for(int row = 0; row < dim - dim / 28; row += dim / 28) {
+            for(int col = 0; col < dim - dim / 28; col += dim / 28) {
+                double grayInvertedPixel = 255 - (0.299 * rawImage[(row * dim + col) * 4] 
+                                            + 0.587 * rawImage[(row * dim + col + 1) * 4] 
+                                            + 0.114 * rawImage[(row * dim + col + 2) * 4]);
+                grayScaleImage.push_back(grayInvertedPixel);
+                rescaledImage.push_back((unsigned char) grayInvertedPixel);
+                rescaledImage.push_back((unsigned char) grayInvertedPixel);
+                rescaledImage.push_back((unsigned char) grayInvertedPixel);
+                rescaledImage.push_back((unsigned char) 255);
+            }
+        }
+
+        lodepng::encode(("data/fashionImages/rescaled_" + names[i]).c_str(), rescaledImage, 28, 28);
+        MatrixXd sample = Eigen::Map<RowVectorXd>(grayScaleImage.data(), 1, grayScaleImage.size());
+        sample = (sample.array() - 127.5) / 127.5;
+
+        cout << m.predict(&sample, 10, 0) << endl;
+    }
+        
+
+    // unsigned error = lodepng::encode("data/", pixels, WIDTH, HEIGHT);
     
     // vector<MatrixXd> weights = m.getWeights();
     // vector<RowVectorXd> biases = m.getBiases();
